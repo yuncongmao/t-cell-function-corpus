@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>T Cell Function Corpus &amp; FuncMapTab</title>
+<meta name="description" content="A standardized atlas of functional T cell perturbation screens, an AI curation agent, and a tabular transformer that predicts functional perturbation effects beyond the transcriptome.">
+<meta property="og:title" content="Predicting T-cell Function beyond Transcriptome">
+<meta property="og:description" content="T Cell Function Corpus: 38 studies, 113 screens, 1.26M gene-level effects. FuncMapTab predicts functional perturbation outcomes in unseen experimental contexts.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16181d;
+  --body:#33373f;
+  --muted:#6b7280;
+  --line:#e3e5ea;
+  --bg:#ffffff;
+  --soft:#f7f8fa;
+  --accent:#8c1515;
+  --accent-soft:#fdf4f4;
+  --blue:#1f4e79;
+  --maxw:880px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{
+  margin:0;background:var(--bg);color:var(--body);
+  font-family:"Source Serif 4",Georgia,serif;
+  font-size:18px;line-height:1.68;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4,.ui{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+
+/* nav */
+nav{
+  position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+  backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--line);
+}
+nav .wrap{display:flex;align-items:center;gap:18px;height:58px}
+.brand{font-family:Inter,sans-serif;font-weight:700;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.brand:hover{text-decoration:none}
+.navlinks{margin-left:auto;display:flex;align-items:center;gap:6px}
+.navlinks a{
+  font-family:Inter,sans-serif;font-size:13.5px;font-weight:500;color:var(--body);
+  padding:7px 12px;border-radius:7px;display:inline-flex;align-items:center;gap:7px;
+}
+.navlinks a:hover{background:var(--soft);text-decoration:none;color:var(--ink)}
+.navlinks a.primary{background:var(--accent);color:#fff}
+.navlinks a.primary:hover{background:#6f1010}
+.navlinks svg{width:15px;height:15px;fill:currentColor}
+@media(max-width:700px){.navlinks a.hide-sm{display:none}}
+
+/* hero */
+header.hero{padding:62px 0 34px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:16px;
+}
+h1{
+  font-family:"Source Serif 4",Georgia,serif;font-weight:700;
+  font-size:clamp(32px,5.2vw,50px);line-height:1.12;letter-spacing:-.02em;
+  color:var(--ink);margin:0 0 16px;
+}
+.tagline{font-size:20px;color:var(--muted);margin:0 0 28px;line-height:1.55}
+.authors{font-size:16.5px;line-height:1.85;color:var(--ink);margin:0 0 10px}
+.authors sup{font-size:11px;color:var(--muted);font-family:Inter,sans-serif}
+.affil{font-family:Inter,sans-serif;font-size:12.5px;line-height:1.85;color:var(--muted);margin:0 0 26px}
+.affil sup{color:var(--accent);font-weight:600}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.btn{
+  font-family:Inter,sans-serif;font-size:14px;font-weight:600;
+  display:inline-flex;align-items:center;gap:9px;padding:11px 19px;border-radius:9px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);transition:.15s;
+}
+.btn:hover{text-decoration:none;border-color:#c9ccd3;background:var(--soft);transform:translateY(-1px)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.dark:hover{background:#000}
+.btn svg{width:16px;height:16px;fill:currentColor}
+
+/* stat band */
+.band{background:var(--soft);border-bottom:1px solid var(--line);padding:30px 0}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;text-align:center}
+.stat .n{font-family:Inter,sans-serif;font-size:27px;font-weight:700;color:var(--accent);letter-spacing:-.02em;line-height:1.1}
+.stat .l{font-family:Inter,sans-serif;font-size:11.5px;color:var(--muted);margin-top:5px;letter-spacing:.02em}
+@media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);gap:22px}}
+
+/* sections */
+section{padding:52px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{
+  font-size:28px;font-weight:700;letter-spacing:-.018em;color:var(--ink);
+  margin:0 0 6px;line-height:1.25;
+}
+.kicker{
+  font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+}
+h3{font-size:18.5px;font-weight:600;color:var(--ink);margin:34px 0 8px;letter-spacing:-.01em}
+p{margin:0 0 18px}
+.lead{font-size:19.5px;color:var(--body)}
+
+/* figures */
+figure{margin:30px 0;padding:0}
+figure img{width:100%;display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
+figcaption{
+  font-family:Inter,sans-serif;font-size:13px;line-height:1.65;color:var(--muted);
+  margin-top:11px;padding-left:13px;border-left:2px solid var(--line);
+}
+figcaption b{color:var(--ink);font-weight:600}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0}
+.card{border:1px solid var(--line);border-radius:11px;padding:18px 18px 16px;background:#fff;transition:.15s}
+.card:hover{border-color:#c9ccd3;box-shadow:0 4px 18px rgba(16,18,22,.05)}
+.card h4{font-size:14.5px;font-weight:600;margin:0 0 6px;color:var(--ink)}
+.card p{font-family:Inter,sans-serif;font-size:13px;line-height:1.6;color:var(--muted);margin:0}
+.card .icon{
+  width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;
+  font-weight:700;font-size:13px;margin-bottom:11px;
+}
+@media(max-width:720px){.cards{grid-template-columns:1fr}}
+
+/* table */
+.tablewrap{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:11px}
+table{border-collapse:collapse;width:100%;font-family:Inter,sans-serif;font-size:13.5px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--soft);font-weight:600;color:var(--ink);font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.best{background:var(--accent-soft)}
+tbody tr.best td{font-weight:600;color:var(--ink)}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+.tnote{font-family:Inter,sans-serif;font-size:12.5px;color:var(--muted);margin-top:-8px}
+
+/* callout */
+.callout{
+  background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 10px 10px 0;padding:18px 20px;margin:26px 0;
+}
+.callout p{margin:0;font-size:17px}
+.callout strong{color:var(--ink)}
+
+/* list */
+ul.clean{list-style:none;padding:0;margin:18px 0}
+ul.clean li{padding:9px 0 9px 26px;position:relative;border-bottom:1px solid var(--line);font-size:17px}
+ul.clean li:last-child{border-bottom:0}
+ul.clean li:before{
+  content:"";position:absolute;left:4px;top:19px;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);
+}
+
+/* bibtex */
+.bibhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+pre{
+  background:#16181d;color:#e6e8ec;border-radius:11px;padding:20px;overflow-x:auto;
+  font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.7;margin:0;
+}
+.copy{
+  font-family:Inter,sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--line);background:#fff;color:var(--body);
+  padding:7px 14px;border-radius:7px;transition:.15s;
+}
+.copy:hover{background:var(--soft);border-color:#c9ccd3}
+
+/* footer */
+footer{padding:36px 0 56px;color:var(--muted);font-family:Inter,sans-serif;font-size:13.5px}
+footer .row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+footer a{color:var(--body)}
+.corr{font-size:13px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">T&nbsp;Cell Function Corpus</a>
+    <div class="navlinks">
+      <a class="hide-sm" href="#corpus">Corpus</a>
+      <a class="hide-sm" href="#curator">Curator</a>
+      <a class="hide-sm" href="#model">Model</a>
+      <a class="hide-sm" href="#results">Results</a>
+      <a href="PAPER_URL" target="_blank" rel="noopener">Paper</a>
+      <a class="primary" href="https://github.com/yuncongmao" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        Code
+      </a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="eyebrow">Stanford &middot; Arc Institute &middot; UCSF</div>
+    <h1>Predicting T&#8209;cell Function beyond the Transcriptome</h1>
+    <p class="tagline">An AI-curated atlas of functional perturbation screens, and a tabular transformer that predicts what a genetic perturbation <em>does</em> &mdash; not just what it expresses.</p>
+
+    <p class="authors">
+      <a href="#">Yuncong Mao</a><sup>1,3</sup>,
+      <a href="#">Emma Dann</a><sup>4,5</sup>,
+      <a href="#">Jiaru Zou</a><sup>6</sup>,
+      <a href="#">Sean Wu</a><sup>6</sup>,
+      <a href="#">Austin Hartman</a><sup>4</sup>,
+      <a href="#">Alexander Marson</a><sup>5</sup>,
+      <a href="#">Jonathan Prichard</a><sup>4</sup>,
+      <a href="#">Yejin Choi</a><sup>6</sup>,
+      <a href="#">Theo Roth</a><sup>2,3,*</sup>,
+      <a href="#">James Zou</a><sup>1,*</sup>
+    </p>
+    <p class="affil">
+      <sup>1</sup>Biomedical Data Science, Stanford School of Medicine &nbsp;&middot;&nbsp;
+      <sup>2</sup>Pathology, Stanford School of Medicine &nbsp;&middot;&nbsp;
+      <sup>3</sup>Arc Institute<br>
+      <sup>4</sup>Genetics, Stanford School of Medicine &nbsp;&middot;&nbsp;
+      <sup>5</sup>Genetics, UCSF &nbsp;&middot;&nbsp;
+      <sup>6</sup>Computer Science, Stanford University
+    </p>
+
+    <div class="btnrow">
+      <a class="btn dark" href="PAPER_URL" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M9.5 0H3.5A1.5 1.5 0 0 0 2 1.5v13A1.5 1.5 0 0 0 3.5 16h9a1.5 1.5 0 0 0 1.5-1.5V4.5L9.5 0Zm0 1.5L12.5 4.5H9.5V1.5ZM4.5 8h7v1h-7V8Zm0 2.5h7v1h-7v-1ZM4.5 5.5h3v1h-3v-1Z"/></svg>
+        Read the paper
+      </a>
+      <a class="btn" href="https://github.com/yuncongmao" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        Code
+      </a>
+      <a class="btn" href="#data">
+        <svg viewBox="0 0 16 16"><path d="M8 1c-3.3 0-6 1.1-6 2.5v9C2 13.9 4.7 15 8 15s6-1.1 6-2.5v-9C14 2.1 11.3 1 8 1Zm0 1.5c2.9 0 4.5.9 4.5 1s-1.6 1-4.5 1-4.5-.9-4.5-1 1.6-1 4.5-1Z"/></svg>
+        Download the corpus
+      </a>
+      <a class="btn" href="#cite">
+        <svg viewBox="0 0 16 16"><path d="M5 4.5c-1.4 0-2.5 1.1-2.5 2.5S3.6 9.5 5 9.5c.2 0 .4 0 .6-.1-.4 1-1.3 1.7-2.4 1.9v1.2c2.4-.3 4.3-2.4 4.3-5 0-1.7-1.1-3-2.5-3Zm6.5 0C10.1 4.5 9 5.6 9 7s1.1 2.5 2.5 2.5c.2 0 .4 0 .6-.1-.4 1-1.3 1.7-2.4 1.9v1.2c2.4-.3 4.3-2.4 4.3-5 0-1.7-1.1-3-2.5-3Z"/></svg>
+        BibTeX
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="band">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="n">38</div><div class="l">PUBLICATIONS</div></div>
+      <div class="stat"><div class="n">113</div><div class="l">FUNCTIONAL SCREENS</div></div>
+      <div class="stat"><div class="n">182</div><div class="l">ASSAY INSTANCES</div></div>
+      <div class="stat"><div class="n">1.26M</div><div class="l">GENE-LEVEL EFFECTS</div></div>
+      <div class="stat"><div class="n">36</div><div class="l">METADATA DIMENSIONS</div></div>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+
+<section id="overview">
+  <div class="wrap">
+    <div class="kicker">Abstract</div>
+    <h2>Transcriptional change is not functional outcome</h2>
+    <p class="lead">Understanding how genetic perturbations affect cellular function is a central goal of T cell engineering. Recent perturbation models predict transcriptional responses well &mdash; but a change in gene expression does not necessarily translate into proliferation, persistence, or cytotoxicity. Learning those relationships has been blocked by the absence of a unified functional screening dataset: published studies sit in heterogeneous supplementary tables with inconsistent annotations, phenotype definitions, and effect-size conventions.</p>
+    <p>We introduce the <strong>T Cell Function Corpus</strong>, a standardized atlas of functional genetic perturbation screens assembled by an AI curation agent, and <strong>FuncMapTab</strong>, a tabular transformer that learns transferable relationships between perturbations and functional phenotypes across experimental contexts. On held-out studies, FuncMapTab consistently outperforms statistical, machine-learning, and single-cell foundation-model baselines at predicting perturbation effect rankings and identifying functional hits &mdash; and from only a few hundred measured genes it can predict effects for unmeasured perturbations, extending focused experiments well beyond their original scope.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="icon">01</div>
+        <h4>The Corpus</h4>
+        <p>113 screens, 1.26M gene-level effects, direction-harmonized across species, modalities and phenotypes.</p>
+      </div>
+      <div class="card">
+        <div class="icon">02</div>
+        <h4>The Curator</h4>
+        <p>A multi-agent system that reads manuscripts and supplementary data at F1 = 0.915 and $2.00 per paper.</p>
+      </div>
+      <div class="card">
+        <div class="icon">03</div>
+        <h4>The Model</h4>
+        <p>A tabular transformer predicting signed functional effects and hit scores in unseen screens and studies.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="corpus">
+  <div class="wrap">
+    <div class="kicker">Resource</div>
+    <h2>T Cell Function Corpus</h2>
+    <p>Unlike conventional screening repositories that organize genes, hit lists and broad phenotype labels, our framework represents each perturbation measurement through seven interconnected metadata blocks: <strong>target, cellular system, intervention, assay, phenotype, effect,</strong> and <strong>screen</strong>.</p>
+    <p>Because functional T cell responses depend strongly on experimental context, the assay block captures stimulation conditions, timing of stimulation and harvest, culture environment, and the selection pressure applied &mdash; distinguishing acute anti-CD3/CD28 activation from repeated stimulation, tumor co-culture, in vivo tumor challenge, and immunosuppressive conditions. The effect block preserves reported effect size, significance, reference-control definition, and statistical method, together with a standardized direction convention.</p>
+
+    <ul class="clean">
+      <li><strong>Species</strong> &mdash; 83 human, 28 mouse and 2 rat screens (822,304 / 333,054 / 104,467 effects).</li>
+      <li><strong>Receptor</strong> &mdash; 64 TCR-based and 49 CAR T cell screens, covering endogenous and engineered systems.</li>
+      <li><strong>Modality</strong> &mdash; CRISPR KO (70 screens; 1,057,410 effects), CRISPRa (7; 149,984), CRISPRi (3; 37,572), knock-in (30; 3,060), overexpression (3; 11,799).</li>
+      <li><strong>Scale</strong> &mdash; 34 genome-wide, 21 intermediate-scale and 58 focused screening experiments.</li>
+      <li><strong>Phenotypes</strong> &mdash; persistence (44 screens), proliferation (34), protein expression (28), trafficking (9), differentiation (5), plus function and viability.</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Versus BioGRID ORCS.</strong> Among 37 PubMed-indexed publications, 30 studies and ~94 screens were absent from ORCS, which also lacked 12 of 34 assay instances from overlapping studies &mdash; including eight in vivo tumor and spleen readouts. Our corpus captures 36 metadata dimensions against 16, and nine specific functional readouts against two broad categories. Where they overlap, quantitative effects agree essentially perfectly (Spearman &rho; &ge; 0.9999 in 25 of 25 screens).</p>
+    </div>
+
+    <figure>
+      <img src="static/images/fig1.png" alt="Figure 1: T Cell Function Corpus overview — metadata completeness, composition, growth over time, phenotype distribution, and comparison with BioGRID ORCS.">
+      <figcaption><b>Figure 1. A standardized atlas of functional T cell perturbation screens.</b> (a) Illustration of the corpus. (b) Seven metadata blocks and their reporting completeness across 182 assay instances. (c) Composition by species, antigen receptor, perturbation modality and library scale. (d) Cumulative growth 2018&ndash;2026. (e) Phenotypes across experimental selection pressures. (f) Comparison with BioGRID ORCS.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="curator">
+  <div class="wrap">
+    <div class="kicker">Method</div>
+    <h2>T-Cell Curator</h2>
+    <p>To build the corpus at scale we developed <strong>T-Cell Curator</strong>, an AI agent that extracts and standardizes metadata and quantitative perturbation effects directly from publications and their supplementary materials. A discovery agent searches for relevant studies, a retrieval agent collects full text and associated materials, and an extraction agent performs the extraction, using the schema as its manual.</p>
+    <p>The extraction workflow is a multi-agent system with a GPT&#8209;5.5 orchestrator and three stages: an <em>inventory</em> agent identifies all reported screens, conditions and readouts; a <em>triage</em> agent examines supplementary tables to confirm or reject candidate screens and locate quantitative measurements; an <em>extraction</em> agent annotates the seven metadata blocks and links each readout to its gene-level effects. During the first five iterations a reflection agent converted expert feedback into reusable guidelines, accumulated in a shared playbook.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>System</th><th class="num">Screen F1</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">Field acc.</th><th class="num">Cost / paper</th></tr>
+        </thead>
+        <tbody>
+          <tr class="best"><td>T-Cell Curator</td><td class="num">0.915</td><td class="num">0.911</td><td class="num">0.919</td><td class="num">98.0%</td><td class="num">$2.00</td></tr>
+          <tr><td>Claude Opus 4.8</td><td class="num">0.814</td><td class="num">0.771</td><td class="num">0.862</td><td class="num">95.3%</td><td class="num">$8.39</td></tr>
+          <tr><td>GPT-5.5</td><td class="num">0.459</td><td class="num">0.315</td><td class="num">0.843</td><td class="num">93.7%</td><td class="num">$2.84</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">Benchmark of 10 publications, 49 screens and 113 readout records curated by a human expert. Paired study-level gains are significant against Opus (&Delta;F1 = 0.101, Holm-adjusted <em>p</em> = 0.0205) and GPT&#8209;5.5 (&Delta;F1 = 0.456, <em>p</em> = 0.0439). Descriptive free-text recovery: 91.9% vs 87.5% and 87.1%.</p>
+
+    <figure>
+      <img src="static/images/fig2.png" alt="Figure 2: T-Cell Curator multi-agent workflow and extraction benchmark results.">
+      <figcaption><b>Figure 2. Accurate and efficient AI-driven curation.</b> (a) Discovery, retrieval and extraction agents feeding the corpus. (b) Multi-agent extraction workflow with orchestrator, inventory, triage and extraction agents plus a feedback playbook. (c) Extraction performance and inference cost against baselines. (d) Paired differences with 95% confidence intervals.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="model">
+  <div class="wrap">
+    <div class="kicker">Model</div>
+    <h2>FuncMapTab</h2>
+    <p>FuncMapTab is a tabular transformer that learns from functional perturbation measurements across diverse experimental contexts, integrating three sources of information: gene-level effects from previously published screens, experimental metadata describing the target screen, and external biological knowledge about each gene.</p>
+    <p>A <strong>screen encoder</strong> represents experimental conditions &mdash; organism, perturbation modality, antigen receptor, selection pressure, functional readout. A <strong>gene-knowledge encoder</strong> integrates gene descriptions, Gene Ontology annotations, protein sequences, interaction networks and genetic dependency data. These are combined with measured effects in a tabular transformer using row&ndash;column attention, and an <strong>in-context transformer</strong> lets unmeasured genes attend to a small set of genes with known effects in the target screen.</p>
+    <p>To separate shared genetic effects from context-specific responses, each prediction decomposes into a <em>donor prior</em> estimated from the gene's effects in related screens and a <em>predicted deviation</em> learned by the transformer, together producing signed effect predictions and functional hit scores.</p>
+
+    <figure>
+      <img src="static/images/fig3.png" alt="Figure 3: FuncMapTab architecture.">
+      <figcaption><b>Figure 3. FuncMapTab architecture.</b> Measured effects, experimental metadata and external gene knowledge pass through six layers of row&ndash;column attention followed by a 24-layer in-context transformer that learns from genes with known effects to predict unmeasured perturbations. Outputs are predicted effect distributions via quantile regression, from which signed effect and functional hit scores are derived. Dashed boxes indicate pretrained layers adapted with LoRA.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="kicker">Evaluation</div>
+    <h2>Results</h2>
+    <p>We benchmarked FuncMapTab against baselines spanning three approaches: a statistical gene-mean baseline, conventional machine learning (kNN, SVD), single-cell foundation models (Stack, PIE), and pretrained tabular models (TabICL, TabFM). Performance is measured by Spearman correlation between predicted and measured gene effects, and AUROC for distinguishing significant functional hits.</p>
+
+    <h3>Three tasks of increasing difficulty</h3>
+    <ul class="clean">
+      <li><strong>Imputation</strong> &mdash; recover held-out gene effects within a partially observed screen (20% held out).</li>
+      <li><strong>Unseen screen</strong> &mdash; only K measured genes revealed; same-readout sibling screens from the study excluded.</li>
+      <li><strong>Unseen study</strong> &mdash; all screens from the target publication excluded, with K revealed genes to guide prediction.</li>
+    </ul>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Setting</th><th class="num">Spearman &rho;</th><th class="num">Hit AUROC</th><th>Strongest baseline</th></tr>
+        </thead>
+        <tbody>
+          <tr class="best"><td>Imputation</td><td>20% held out</td><td class="num">0.387</td><td class="num">0.828</td><td>TabFM / TabICL</td></tr>
+          <tr class="best"><td>Unseen screen</td><td>K = 200</td><td class="num">0.388</td><td class="num">0.827</td><td>TabFM</td></tr>
+          <tr class="best"><td>Unseen study</td><td>K = 200</td><td class="num">0.242</td><td class="num">0.783</td><td>TabFM (0.227 / 0.757)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tnote">Across the 90 comparisons in Figure 4, FuncMapTab performed significantly better in 88, and no baseline significantly outperformed it. Stack and PIE &mdash; both transcriptome-trained foundation models &mdash; fell below the gene-mean baseline.</p>
+
+    <figure>
+      <img src="static/images/fig4.png" alt="Figure 4: Benchmark against statistical, machine learning and single-cell foundation model baselines.">
+      <figcaption><b>Figure 4. FuncMapTab outperforms statistical, ML and single-cell foundation-model baselines.</b> (a) The three prediction tasks. (b) Imputation across 108 screens from 31 studies. (c) Unseen screens with 10, 50, 200 or 1,000 revealed genes. (d) Entirely unseen studies at the same anchor counts. Error bars are 95% CIs from study-level bootstrapping; paired differences use sign-flip tests with Benjamini&ndash;Hochberg correction.</figcaption>
+    </figure>
+
+    <h3>Direction matters: enriched versus depleted hits</h3>
+    <p>Knowing whether a perturbation <em>increases</em> or <em>decreases</em> the measured phenotype is essential for selecting candidates &mdash; a researcher may want knockouts that raise cytokine production or lower an exhaustion marker. FuncMapTab's largest advantage was in identifying enriched hits: AUROC 0.814 on imputation against 0.653 for the strongest baseline. With 200 measured genes in an unseen screen, its top 50 predictions recovered <strong>43.7%</strong> of enriched hits versus 26.8% for TabFM. In unseen studies, baseline enriched-hit rankings were near chance while FuncMapTab reached AUROC 0.741. For depleted hits, top-50 recall in an unseen study was 34.2% versus 29.0%.</p>
+
+    <figure>
+      <img src="static/images/fig5.png" alt="Figure 5: Directional hit prioritization for enriched and depleted perturbations.">
+      <figcaption><b>Figure 5. Improved prioritization of enriched and depleted hits.</b> (a) Imputation with 20% of genes held out. (b) Unseen screens at K = 10, 50, 200. (c) Unseen studies at the same anchor counts. Enriched and depleted hits are evaluated separately with AUROC, average precision, precision@50 and recall@50. Asterisks mark significantly better performance than the strongest baseline (adjusted <em>P</em> &lt; 0.05).</figcaption>
+    </figure>
+
+    <h3>From a focused in vivo screen to a genome-wide prediction</h3>
+    <p>In vivo screens rely on small curated libraries because genome-wide screening in animals is resource intensive &mdash; one abundance screen alone required 22 tumor-bearing mice. We emulated that setting on a genome-wide in vivo held-out study: for each assay FuncMapTab received 200 measured genes and predicted effects for ~11,200 unmeasured ones.</p>
+    <p>Across the four assays it ranked enriched hits with a mean <strong>AUROC of 0.877</strong> and average precision 0.115, against 0.694 and 0.079 for the strongest comparator, and recovered depleted hits with a hit-weighted AUROC of 0.936. Of 27 confirmed enriched hits, 21 landed in the top predicted decile; of 1,350 confirmed depleted hits, 962 did.</p>
+
+    <figure>
+      <img src="static/images/fig6.png" alt="Figure 6: Genome-wide in silico prioritization from a limited in vivo anchor screen.">
+      <figcaption><b>Figure 6. Genome-wide in silico prioritization from limited in vivo screens.</b> (a) Proposed workflow: a ~200-gene library tested in tumor-bearing mice anchors genome-wide prediction. (b) Performance on the held-out in vivo benchmark with 200 revealed genes per assay across tumor infiltration, IFN&#8209;&gamma; production, spleen abundance and tumor abundance. (c) Predicted versus observed within-assay percentile ranks for all 44,820 matched gene&ndash;assay observations. Results are descriptive point estimates from one held-out study.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="data">
+  <div class="wrap">
+    <div class="kicker">Access</div>
+    <h2>Data &amp; code</h2>
+    <p>The T Cell Function Corpus, the curation schema, and FuncMapTab training and evaluation code are released for research use.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="icon">&#8595;</div>
+        <h4>Corpus download</h4>
+        <p>Standardized screens, assay instances and gene-level effect tables with full metadata. <a href="DATA_URL">Get the data &rarr;</a></p>
+      </div>
+      <div class="card">
+        <div class="icon">&#123;&#125;</div>
+        <h4>Metadata schema</h4>
+        <p>The seven-block schema and direction conventions used by the curation agent. <a href="SCHEMA_URL">View schema &rarr;</a></p>
+      </div>
+      <div class="card">
+        <div class="icon">&lt;/&gt;</div>
+        <h4>FuncMapTab</h4>
+        <p>Model code, pretrained weights and benchmark reproduction scripts. <a href="https://github.com/yuncongmao">GitHub &rarr;</a></p>
+      </div>
+    </div>
+    <p class="corr">Correspondence: <a href="mailto:jamesz@stanford.edu">jamesz@stanford.edu</a>, <a href="mailto:troth@stanford.edu">troth@stanford.edu</a></p>
+  </div>
+</section>
+
+<section id="cite">
+  <div class="wrap">
+    <div class="bibhead">
+      <h2 style="margin:0">Citation</h2>
+      <button class="copy" id="copyBtn">Copy BibTeX</button>
+    </div>
+    <pre id="bib">@article{mao2026tcellfunction,
+  title   = {Predicting T-cell Function beyond Transcriptome},
+  author  = {Mao, Yuncong and Dann, Emma and Zou, Jiaru and Wu, Sean and
+             Hartman, Austin and Marson, Alexander and Prichard, Jonathan and
+             Choi, Yejin and Roth, Theo and Zou, James},
+  journal = {bioRxiv},
+  year    = {2026},
+  url     = {https://yuncongmao.github.io/t-cell-function-corpus/}
+}</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap row">
+    <div>T Cell Function Corpus &middot; FuncMapTab</div>
+    <div>Stanford University &middot; Arc Institute &middot; UCSF</div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('copyBtn').addEventListener('click', function(){
+  var t = document.getElementById('bib').innerText;
+  navigator.clipboard.writeText(t).then(function(){
+    var b = document.getElementById('copyBtn');
+    b.textContent = 'Copied';
+    setTimeout(function(){ b.textContent = 'Copy BibTeX'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>
