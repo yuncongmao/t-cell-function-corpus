@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>T Cell Function Corpus</title>
-<meta name="description" content="A standardized atlas of functional T cell perturbation screens, curated by an AI agent, and FuncMapTab, a tabular transformer that predicts functional perturbation effects.">
+<meta name="description" content="A standardized atlas of functional T cell perturbation screens, curated by an AI agent, and FuncMap, a tabular transformer that predicts functional perturbation effects.">
 <meta property="og:title" content="Predicting T-cell Function beyond Transcriptome">
 <meta property="og:description" content="38 studies, 113 screens, 1.26M gene-level effects — and a model that predicts functional outcomes in unseen experimental contexts.">
 <meta property="og:type" content="article">
@@ -124,9 +124,11 @@ button{font:inherit;color:inherit}
 
 /* figures */
 .fig{margin:40px 0 44px;clear:both}
-.fig img{width:100%;display:block;border:1px solid var(--rule);border-radius:8px;background:#fff}
-.fig.hero-fig{width:min(var(--col),calc(100vw - 32px));margin:52px auto 0}
-.fig figcaption{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin-top:16px;max-width:760px}
+.fig img{width:100%;height:auto;display:block}
+.fig.wide{width:min(1000px,calc(100vw - 32px));position:relative;left:50%;transform:translateX(-50%)}
+.fig.hero-fig{width:min(1000px,calc(100vw - 32px));margin:52px auto 0}
+.fig figcaption{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin:16px auto 0;max-width:var(--col)}
+.fig .full{white-space:nowrap;color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--rule-2);text-underline-offset:3px}
 .fig figcaption .lab{font-weight:600;color:var(--ink)}
 .fig figcaption b{font-weight:600;color:var(--ink-2)}
 
@@ -238,7 +240,7 @@ button{font:inherit;color:inherit}
 
   <figure class="fig hero-fig">
     <img src="static/images/fig1.png" alt="Overview of the T Cell Function Corpus: harmonised perturbation effects, the seven metadata blocks and their reporting completeness, corpus composition, growth over time, phenotype distribution, and comparison with BioGRID ORCS.">
-    <figcaption><span class="lab">The corpus.</span> 38 publications, 113 functional screens, 182 assay instances and 1.26&nbsp;million gene-level perturbation effects, each carrying the experimental context needed to interpret it.</figcaption>
+    <figcaption><span class="lab">The corpus.</span> 38 publications, 113 functional screens, 182 assay instances and 1.26&nbsp;million gene-level perturbation effects, each carrying the experimental context needed to interpret it. <a class="full" href="static/images/fig1.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 </header>
 
@@ -249,7 +251,7 @@ button{font:inherit;color:inherit}
   <p>Understanding how genetic perturbations affect cellular function is a central goal of T&nbsp;cell engineering, with direct implications for cancer therapeutics. Recent perturbation models have made real progress in predicting transcriptional responses &mdash; but a change in gene expression does not necessarily translate into proliferation, persistence, or cytotoxicity.</p>
   <p class="c-a">Learning those relationships has been limited by the absence of a unified functional screening dataset.<span class="snr"></span> Published studies remain scattered across heterogeneous supplementary tables, with inconsistent experimental annotations, phenotype definitions and effect-size conventions.</p>
   <span class="sn c-a">A functional screen is defined not only by the perturbed gene, but by the cellular system, perturbation modality, experimental context, assay and statistical comparison used to quantify its effect. Even the sign of an effect can mean different things in different assays.</span>
-  <p>We introduce the <strong>T Cell Function Corpus</strong>, a standardized atlas of functional genetic perturbation screens assembled by an AI curation agent, and <strong>FuncMapTab</strong>, a tabular transformer that learns transferable relationships between perturbations and functional phenotypes across experimental contexts. Evaluated on held-out studies, FuncMapTab consistently outperformed statistical, machine-learning and single-cell foundation-model baselines at predicting perturbation effect rankings and identifying functional hits. With only a small number of measured genes from a new screen, it can predict effects for unmeasured perturbations &mdash; a practical way to extend focused experiments beyond their original scope.</p>
+  <p>We introduce the <strong>T Cell Function Corpus</strong>, a standardized atlas of functional genetic perturbation screens assembled by an AI curation agent, and <strong>FuncMap</strong>, a tabular transformer that learns transferable relationships between perturbations and functional phenotypes across experimental contexts. Evaluated on held-out studies, FuncMap consistently outperformed statistical, machine-learning and single-cell foundation-model baselines at predicting perturbation effect rankings and identifying functional hits. With only a small number of measured genes from a new screen, it can predict effects for unmeasured perturbations &mdash; a practical way to extend focused experiments beyond their original scope.</p>
 </section>
 
 <section id="corpus">
@@ -261,23 +263,23 @@ button{font:inherit;color:inherit}
     <div><span class="n" data-k>38</span><span class="l">publications</span></div>
     <div><span class="n" data-k>113</span><span class="l">screens</span></div>
     <div><span class="n" data-k>182</span><span class="l">assay instances</span></div>
+    <div><span class="n" data-k>26,582</span><span class="l">genes</span></div>
     <div><span class="n" data-k>1.26M</span><span class="l">gene-level effects</span></div>
-    <div><span class="n" data-k>36</span><span class="l">metadata fields</span></div>
   </div>
   <p class="cap">Studies published between 2018 and 2026.</p>
 
   <ul class="plain">
     <li><strong>Species</strong> &mdash; 83 human, 28 mouse and 2 rat screens, with 822,304, 333,054 and 104,467 effect measurements respectively.</li>
-    <li><strong>Antigen receptor</strong> &mdash; 64 TCR-based and 49 CAR&nbsp;T screens, capturing both endogenous and engineered systems.</li>
+    <li><strong>Antigen receptor</strong> &mdash; 75 TCR-based and 38 CAR&nbsp;T screens (886,745 and 373,080 effects), capturing both endogenous and engineered systems.</li>
     <li><strong>Modality</strong> &mdash; CRISPR nuclease loss-of-function dominates (70 screens; 1,057,410 effects), followed by CRISPRa (7; 149,984), CRISPRi (3; 37,572), knock-in (30; 3,060) and transgene overexpression (3; 11,799).</li>
-    <li><strong>Phenotype</strong> &mdash; persistence is most studied (44 screens), then proliferation (34), protein expression (28), trafficking (9) and differentiation (5), with further measurements of cellular function and viability.</li>
+    <li><strong>Phenotype</strong> &mdash; across the 182 assay instances, persistence is the most common readout (56), followed by proliferation (47), protein expression (46), trafficking (18) and differentiation (8), with further measurements of effector function and viability.</li>
   </ul>
 
-  <p>These outcomes were interrogated under diverse conditions &mdash; marker-based selection (28 screens), tumor challenge (26), proliferation-based selection (25), chronic stimulation (22), infection (5) and immunosuppression (4). Preserving those contexts alongside the readouts is what distinguishes proliferation under acute activation from sustained expansion or persistence during repeated antigen exposure.</p>
+  <p>These outcomes were interrogated under diverse conditions &mdash; tumor challenge (45 assays), marker-based sorting (44), chronic stimulation (28), proliferation-based selection (26), in&nbsp;vivo trafficking (12), activation (8), infection (8) and immunosuppression (6). Preserving those contexts alongside the readouts is what distinguishes proliferation under acute activation from sustained expansion or persistence during repeated antigen exposure.</p>
 
   <div class="update-note">
     <p><b>Compared with BioGRID ORCS.</b> Among 37 PubMed-indexed publications, 30 studies and roughly 94 screens were absent from ORCS, which also lacked 12 of 34 assay instances from overlapping studies &mdash; including eight in&nbsp;vivo tumor and spleen readouts.</p>
-    <p>Our corpus captures 36 metadata dimensions against 16, and across 25 shared screens distinguishes nine specific functional readouts (IL-2, IFN-&gamma; and TNF production among them) where ORCS has two broad categories. Where the two overlap, quantitative effects agree essentially perfectly: Spearman &rho;&nbsp;&ge;&nbsp;0.9999 in 25 of 25 screens.</p>
+    <p>Our corpus captures 33 metadata dimensions against 16, and across 25 shared screens distinguishes nine specific functional readouts (IL-2, IFN-&gamma; and TNF production among them) where ORCS has two broad categories. Where the two overlap, quantitative effects agree essentially perfectly: Spearman &rho;&nbsp;&ge;&nbsp;0.9999 in 25 of 25 screens.</p>
   </div>
 </section>
 
@@ -287,9 +289,9 @@ button{font:inherit;color:inherit}
   <p class="c-c">The extraction workflow is a multi-agent system coordinated by a GPT-5.5 orchestrator across three stages. An <em>inventory</em> agent examines the manuscript to identify all reported screens, experimental conditions and functional readouts. A <em>triage</em> agent examines the corresponding supplementary tables to confirm or reject candidate screens, resolve discrepancies between manuscript and data, and locate quantitative measurements. An <em>extraction</em> agent then annotates the seven metadata blocks and links each screen and readout to its gene-level effects.<span class="snr"></span></p>
   <span class="sn c-c">During the first five iterations, expert feedback was reviewed by a reflection agent that converted recurring errors into reusable guidelines, accumulated in a shared playbook and folded into later extraction prompts.</span>
 
-  <figure class="fig">
+  <figure class="fig wide">
     <img src="static/images/fig2.png" alt="T-Cell Curator multi-agent workflow and extraction benchmark results.">
-    <figcaption><span class="lab">Figure 2.</span> <b>(a)</b> Discovery, retrieval and extraction agents feeding the corpus. <b>(b)</b> Multi-agent extraction workflow with orchestrator, inventory, triage and extraction agents plus the feedback playbook. <b>(c)</b> Extraction performance and inference cost against baselines; bars show means with 95% confidence intervals. <b>(d)</b> Paired differences between T-Cell Curator and each baseline.</figcaption>
+    <figcaption><span class="lab">Figure 2.</span> <b>(a)</b> Discovery, retrieval and extraction agents feeding the corpus. <b>(b)</b> Multi-agent extraction workflow with orchestrator, inventory, triage and extraction agents plus the feedback playbook. <b>(c)</b> Extraction performance and inference cost against baselines; bars show means with 95% confidence intervals. <b>(d)</b> Paired differences between T-Cell Curator and each baseline. <a class="full" href="static/images/fig2.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 
   <div class="tw">
@@ -304,24 +306,24 @@ button{font:inherit;color:inherit}
       </tbody>
     </table>
   </div>
-  <p class="cap">Benchmark of 10 publications, 49 screens and 113 readout records curated by a human expert. Paired study-level gains are significant against Opus (&Delta;F1&nbsp;=&nbsp;0.101, Holm-adjusted <em>p</em>&nbsp;=&nbsp;0.0205) and GPT-5.5 (&Delta;F1&nbsp;=&nbsp;0.456, <em>p</em>&nbsp;=&nbsp;0.0439). Descriptive free-text recovery by LLM-as-judge: 91.9% against 87.5% and 87.1%.</p>
+  <p class="cap">Benchmark of 10 publications, 49 screens and 113 readout records curated by a human expert. Paired study-level differences in F1 favour the Curator against both Opus (<em>P</em>&nbsp;=&nbsp;0.0010) and GPT-5.5 (<em>P</em>&nbsp;=&nbsp;0.0029), as do precision and recall; exact-field accuracy differences are not significant (<em>P</em>&nbsp;=&nbsp;0.074 and 0.219). The cost saving is significant against Opus (<em>P</em>&nbsp;=&nbsp;0.0010) but not GPT-5.5 (<em>P</em>&nbsp;=&nbsp;0.053). Descriptive free-text recovery by LLM-as-judge: 91.9% against 87.5% and 87.1%.</p>
 </section>
 
 <section id="model">
-  <h2>FuncMapTab</h2>
-  <p>FuncMapTab is a tabular transformer that learns from functional perturbation measurements across diverse experimental contexts, integrating three sources of information: gene-level effects from previously published screens, experimental metadata describing the target screen, and external biological knowledge about each gene.</p>
+  <h2>FuncMap</h2>
+  <p>FuncMap is a tabular transformer that learns from functional perturbation measurements across diverse experimental contexts, integrating three sources of information: gene-level effects from previously published screens, experimental metadata describing the target screen, and external biological knowledge about each gene.</p>
   <p>A <em>screen encoder</em> represents experimental conditions &mdash; organism, perturbation modality, antigen receptor, selection pressure, functional readout. A <em>gene-knowledge encoder</em> integrates gene descriptions, Gene Ontology annotations, protein sequences, interaction networks and genetic dependency data. These representations combine with previously measured effects in a tabular transformer that uses row&ndash;column attention to learn relationships across genes and screens. An in-context transformer then lets unmeasured genes attend to a small set of genes with known effects in the target screen, adapting predictions to the new setting.</p>
   <p>To separate shared genetic effects from context-specific responses, each prediction decomposes into a <em>donor prior</em>, estimated from the gene's effects in related screens, and a <em>predicted deviation</em> learned by the transformer. Together these produce signed effect predictions and functional hit scores.</p>
 
-  <figure class="fig">
-    <img src="static/images/fig3.png" alt="FuncMapTab architecture: inputs of screen metadata, anchor and query genes and gene evidence, and outputs of signed effect and hit classification.">
-    <figcaption><span class="lab">Figure 3.</span> Measured effects, experimental metadata and external gene knowledge pass through six layers of row&ndash;column attention, followed by a 24-layer in-context transformer that learns from genes with known effects to predict unmeasured perturbations. Outputs are predicted effect distributions via quantile regression, from which signed effect and functional hit scores are derived. Dashed boxes indicate pretrained layers adapted with LoRA.</figcaption>
+  <figure class="fig wide">
+    <img src="static/images/fig3.png" alt="FuncMap architecture: inputs of screen metadata, anchor and query genes and gene evidence, and outputs of signed effect and hit classification.">
+    <figcaption><span class="lab">Figure 3.</span> Measured effects, experimental metadata and external gene knowledge pass through six layers of row&ndash;column attention, followed by a 24-layer in-context transformer that learns from genes with known effects to predict unmeasured perturbations. Outputs are predicted effect distributions via quantile regression, from which signed effect and functional hit scores are derived. Dashed boxes indicate pretrained layers adapted with LoRA. <a class="full" href="static/images/fig3.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 </section>
 
 <section id="results">
   <h2>Results</h2>
-  <p>We benchmarked FuncMapTab against baselines spanning three approaches: a statistical gene-mean baseline, conventional machine learning (k-nearest neighbors, SVD), single-cell foundation models (Stack, PIE) and pretrained tabular models (TabICL, TabFM). Performance is assessed by Spearman correlation between predicted and measured gene effects, and AUROC for distinguishing significant functional hits.</p>
+  <p>We benchmarked FuncMap against baselines spanning three approaches: a statistical gene-mean baseline, conventional machine learning (k-nearest neighbors, SVD), single-cell foundation models (Stack, PIE), gradient boosting fitted within each screen (CatBoost), a transformer trained on our corpus (AssayFormer) and pretrained tabular foundation models used frozen (TabICL, Kumo). Performance is assessed by Spearman correlation between predicted and measured gene effects, and AUROC for distinguishing significant functional hits. Every setting was run five times, with a new seed and a new draw of revealed genes or folds each time.</p>
 
   <h3>Three tasks of increasing difficulty</h3>
   <ul class="plain">
@@ -330,9 +332,9 @@ button{font:inherit;color:inherit}
     <li><strong>Unseen study</strong> &mdash; all screens from the target publication are excluded, with K revealed genes to guide prediction.</li>
   </ul>
 
-  <figure class="fig">
+  <figure class="fig wide">
     <img src="static/images/fig4.png" alt="The three prediction tasks and benchmark results against statistical, machine learning and single-cell foundation model baselines.">
-    <figcaption><span class="lab">Figure 4.</span> <b>(a)</b> The three prediction tasks; red marks revealed genes, question marks genes to be predicted, blue measurements available from other screens. <b>(b)</b> Imputation across 108 screens from 31 studies. <b>(c)</b> Unseen screens with 10, 50, 200 or 1,000 revealed genes. <b>(d)</b> Entirely unseen studies at the same anchor counts. Error bars are 95% confidence intervals from study-level bootstrapping; paired differences use study-level sign-flip tests with Benjamini&ndash;Hochberg correction.</figcaption>
+    <figcaption><span class="lab">Figure 4.</span> <b>(a)</b> The three evaluation tasks; schematic colours are illustrative. <b>(b&ndash;d)</b> Spearman correlation of the signed effect and pooled-hit AUROC for imputation (b), unseen screens (c) and unseen studies (d), with 10, 50 or 200 revealed genes in c and d. Bars show the mean of five runs and black lines the s.d. over runs. Difference panels show FuncMap minus each baseline with percentile 95% intervals from 20,000 study bootstraps; filled markers denote <em>q</em>&nbsp;&lt;&nbsp;0.05 (paired sign-flip test over studies, Benjamini&ndash;Hochberg across 111 contrasts). Y axes are broken, so bar heights are not comparable between values of K. <a class="full" href="static/images/fig4.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 
   <div class="tw">
@@ -341,33 +343,33 @@ button{font:inherit;color:inherit}
         <tr><th class="m">Task</th><th>Setting</th><th>Spearman &rho;</th><th>Hit AUROC</th><th>Strongest baseline</th></tr>
       </thead>
       <tbody>
-        <tr class="ours"><td class="m">Imputation</td><td><span class="cell">20% held out</span></td><td><span class="cell hi">0.387</span></td><td><span class="cell hi">0.828</span></td><td><span class="cell">TabFM / TabICL</span></td></tr>
-        <tr class="ours"><td class="m">Unseen screen</td><td><span class="cell">K = 200</span></td><td><span class="cell hi">0.388</span></td><td><span class="cell hi">0.827</span></td><td><span class="cell">TabFM</span></td></tr>
-        <tr class="ours"><td class="m">Unseen study</td><td><span class="cell">K = 200</span></td><td><span class="cell hi">0.242</span></td><td><span class="cell hi">0.783</span></td><td><span class="cell">0.227 / 0.757</span></td></tr>
+        <tr class="ours"><td class="m">Imputation</td><td><span class="cell">20% held out</span></td><td><span class="cell">0.387</span></td><td><span class="cell hi">0.829</span></td><td><span class="cell">Kumo 0.387 / 0.809</span></td></tr>
+        <tr class="ours"><td class="m">Unseen screen</td><td><span class="cell">K = 200</span></td><td><span class="cell hi">0.392</span></td><td><span class="cell hi">0.829</span></td><td><span class="cell">Kumo 0.383 / 0.806</span></td></tr>
+        <tr class="ours"><td class="m">Unseen study</td><td><span class="cell">K = 200</span></td><td><span class="cell hi">0.244</span></td><td><span class="cell hi">0.785</span></td><td><span class="cell">Kumo 0.233 / 0.768</span></td></tr>
       </tbody>
     </table>
   </div>
-  <p class="cap c-g">Across the 90 comparisons in Figure 4, FuncMapTab performed significantly better in 88, and no baseline significantly outperformed it. Stack and PIE &mdash; both trained on transcriptomes &mdash; fell below the gene-mean baseline.<span class="snr"></span></p>
+  <p class="cap c-g">Mean of five runs. Across the 111 paired comparisons in Figure 4, FuncMap was significantly ahead in 109 and no baseline was significantly ahead. The two exceptions are imputation Spearman &rho;, where FuncMap and Kumo tie (unshaded above), and unseen-screen &rho; at K&nbsp;=&nbsp;10 against kNN. On imputation, Stack and PIE &mdash; both trained on transcriptomes &mdash; fell below the gene-mean baseline.<span class="snr"></span></p>
   <span class="sn c-g">Representations optimized for transcriptional response do not necessarily capture what matters for downstream cellular function. This does not imply transcriptomic data lack predictive value &mdash; molecular and functional measurements simply reflect different aspects of the response.</span>
 
-  <p>In the unseen-screen task, FuncMapTab achieved the highest effect-ranking and hit-classification performance at every tested anchor count. Its advantage over pretrained tabular models was largest when few genes were revealed, and accuracy rose as more measurements became available. With 200 measured genes it reached &rho;&nbsp;=&nbsp;0.388 and AUROC&nbsp;=&nbsp;0.827 &mdash; closely matching its imputation performance despite exclusion of the target screen and its same-readout siblings. A focused screen of a few hundred genes can therefore support prediction across a much larger set of unmeasured perturbations.</p>
+  <p>In the unseen-screen task, FuncMap had the highest mean Spearman &rho; and hit AUROC at every tested anchor count. Its AUROC margin over the next-best method was largest when few genes were revealed (0.763 against 0.710 for CatBoost at K&nbsp;=&nbsp;10) and narrowed as more measurements became available. With 200 measured genes it reached &rho;&nbsp;=&nbsp;0.392 and AUROC&nbsp;=&nbsp;0.829 &mdash; matching its imputation performance despite exclusion of the target screen and its same-readout siblings. A focused screen of a few hundred genes can therefore support prediction across a much larger set of unmeasured perturbations.</p>
 
   <h3>Direction matters</h3>
   <p>Knowing whether a perturbation <em>increases</em> or <em>decreases</em> the measured phenotype is essential for interpreting it. A researcher may want knockouts that raise cytokine production, or lower an exhaustion marker; a useful model must distinguish the direction of an effect, not merely identify genes that affect the phenotype.</p>
-  <p>FuncMapTab's largest advantage was in identifying enriched hits: AUROC 0.814 on imputation against 0.653 for the strongest baseline, and the advantage persisted when entire screens or studies were excluded. With 200 measured genes in an unseen screen, its top 50 predictions recovered <strong>43.7%</strong> of enriched hits against 26.8% for TabFM. In unseen studies, baseline enriched-hit rankings were close to chance while FuncMapTab reached AUROC 0.741. For depleted hits the gains were most evident in prioritization: top-50 recall of 34.2% against 29.0% in an unseen study.</p>
+  <p>FuncMap's largest advantage was in identifying enriched hits: on imputation its enriched-hit AUROC was 0.824 against 0.700 for Kumo, the strongest baseline, and the gap held when whole screens or studies were excluded &mdash; 0.824 against 0.702 for unseen screens and 0.757 against 0.663 (AssayFormer) for unseen studies, both at K&nbsp;=&nbsp;200. In an unseen screen with 200 measured genes, its top 50 predictions recovered <strong>38.5%</strong> of enriched hits against 31.3% for Kumo.</p>
 
-  <figure class="fig">
+  <figure class="fig wide">
     <img src="static/images/fig5.png" alt="Directional hit prioritization for enriched and depleted perturbations across the three tasks.">
-    <figcaption><span class="lab">Figure 5.</span> <b>(a)</b> Imputation with 20% of genes held out. <b>(b)</b> Unseen screens at K&nbsp;=&nbsp;10, 50, 200. <b>(c)</b> Unseen studies at the same anchor counts. Enriched and depleted hits are evaluated separately with AUROC, average precision, precision@50 and recall@50. Asterisks mark significantly better performance than the strongest baseline for that task, K and metric (adjusted <em>P</em>&nbsp;&lt;&nbsp;0.05).</figcaption>
+    <figcaption><span class="lab">Figure 5.</span> <b>Direction-specific hit ranking across the three evaluation tasks, in five repeated runs.</b> <b>(a)</b> Imputation within a screen (Task 1). <b>(b)</b> Unseen screen (Task 2). <b>(c)</b> Unseen study (Task 3). Top rows, enriched hits; bottom rows, depleted hits. FuncMap&#x27;s enriched score is its enriched expert and its depleted score is the negative of the backbone&#x27;s signed prediction. Baselines use the two orientations of their signed prediction, except AssayFormer, whose enriched and depleted rankings are separate passes with an &quot;increases&quot; or &quot;decreases&quot; phenotype description. Each run gives a study-equal mean (assays averaged within families, families within studies; n = 20-21 studies). Bars show the mean of the five runs and black lines the s.d. over the five runs. The runs are the original benchmark run plus four with a new seed and a new random draw of the revealed genes (Tasks 2-3) or folds (Task 1); the FuncMap backbone was trained once and is shared by all runs, and the enriched expert is re-trained in every run. AUROC and average precision are calculated among genes with a known direction label. Precision@50 is the lower-bound precision among the top 50 genes, with unlabelled genes kept in the denominator; Recall@50 is the fraction of all confirmed hits of that direction found in the top 50. Stack and PIE have no value at K = 10. A double slash marks axes that start above zero. Paired study-level tests of FuncMap against every baseline are given in the Source Data. <a class="full" href="static/images/fig5.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 
   <h3>From a focused in vivo screen to a genome-wide prediction</h3>
-  <p>In&nbsp;vivo perturbation screens commonly rely on small, manually curated libraries, because genome-wide screening in animals remains technically challenging and resource intensive &mdash; one abundance screen alone required 22 tumor-bearing mice. <a href="https://doi.org/10.1038/s41586-026-10906-9" target="_blank" rel="noopener">Liu et&nbsp;al.</a> developed the first genome-wide in&nbsp;vivo CRISPR screens in human T&nbsp;cells, giving a stringent held-out validation set. We emulated the practical setting against it: for each assay, FuncMapTab received measured effects for 200 genes and predicted effects for roughly 11,200 unmeasured ones.</p>
-  <p>Across the four assays it ranked enriched hits more accurately than all seven comparison methods, with a mean AUROC of <strong>0.877</strong> and average precision 0.115, against 0.694 and 0.079 for the strongest comparator. Depleted hits were recovered strongly too, at a hit-weighted AUROC of 0.936. Of 27 confirmed enriched hits, 21 landed in the top predicted decile; of 1,350 confirmed depleted hits, 962 did.</p>
+  <p>In&nbsp;vivo perturbation screens commonly rely on small, manually curated libraries, because genome-wide screening in animals remains technically challenging and resource intensive &mdash; one abundance screen alone required 22 tumor-bearing mice. <a href="https://doi.org/10.1038/s41586-026-10906-9" target="_blank" rel="noopener">Liu et&nbsp;al.</a> developed the first genome-wide in&nbsp;vivo CRISPR screens in human T&nbsp;cells, giving a stringent held-out validation set. We emulated the practical setting against it: for each assay, FuncMap received measured effects for 200 genes and predicted effects for roughly 11,200 unmeasured ones.</p>
+  <p>Across the four assays and five runs it ranked enriched hits more accurately than all nine comparison methods, with a mean AUROC of <strong>0.881</strong> and average precision 0.118. It also had the highest mean hit-weighted depleted-hit AUROC, at 0.932.</p>
 
-  <figure class="fig">
+  <figure class="fig wide">
     <img src="static/images/fig6.png" alt="Genome-wide in silico prioritization from a limited in vivo anchor screen.">
-    <figcaption><span class="lab">Figure 6.</span> <b>(a)</b> A curated library of roughly 200 genes tested in tumor-bearing mice anchors genome-wide prediction; candidates meeting prespecified criteria go forward to follow-up. <b>(b)</b> Performance on the held-out in&nbsp;vivo benchmark with 200 revealed genes per assay, across tumor infiltration, IFN-&gamma; production, spleen abundance and tumor abundance. <b>(c)</b> Predicted against observed within-assay percentile ranks for all 44,820 matched gene&ndash;assay observations. Results are descriptive point estimates from one held-out study.</figcaption>
+    <figcaption><span class="lab">Figure 6.</span> <b>Genome-wide in-vivo prediction and held-out-study validation of FuncMap.</b> <b>(a)</b> Schematic of the proposed use case: a manually curated library is tested in vivo in tumor-bearing mice and the effect of every gene in the library is measured; measured genes serve as anchors for a genome-wide in silico screen. Hits meeting prespecified statistical thresholds proceed to wet-lab testing. <b>(b)</b> Liu 2026 performance in the unseen-study task with 200 revealed genes per assay, in the five runs of the benchmark (the original run plus four with a new seed and a new random draw of the revealed genes). Bars compare FuncMap with gene mean, kNN, SVD, Stack, PIE, CatBoost (fitted per screen), AssayFormer (trained on our database), TabICL and Kumo (both pretrained, frozen) on the same finite gene support. Bars show the mean of the five runs and black lines the s.d. over the five runs; the bar with the highest mean is outlined and the number above each red bar gives the FuncMap mean. Within a run, the depleted AUROC shown is the depleted-hit-count-weighted mean of the four assay AUROCs: sum(n_D,s × AUROC_s) / sum(n_D,s), with counts 1, 2, 677–681 and 666–670 (total 1,346–1,353 across runs). The same weights apply to every method. All other metrics are equal means across the four assays. This is an average of within-assay AUROCs, not a pooled AUROC; the unweighted depleted AUROC is retained in the source table. FuncMap denotes the backbone plus the trained enriched-hit expert: enriched metrics use the expert score, whereas depleted and signed outputs use the backbone&#x27;s signed prediction. AssayFormer has no signed-effect output and is absent from the Spearman panel. <b>(c)</b> Direction-specific FuncMap predictions against ground truth for all 44,820 matched gene–assay observations of the original run. Within-assay ranks are displayed over the full 0–100 percentile range on both axes, with a small boundary margin to prevent marker clipping. Red triangles mark the 27 confirmed enriched hits in the enrichment panel; blue inverted triangles mark the 1,350 confirmed depleted hits in the depletion panel. All other genes, including confirmed opposite-direction hits, are included in the background density without separate hit markers. Percentile 100 denotes the strongest observed or predicted direction-specific effect. Results describe one historically analyzed held-out study; the error lines reflect run-to-run variation only, and no cross-study uncertainty or significance test is implied. Source data are provided as Source Data files. <a class="full" href="static/images/fig6.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
   </figure>
 </section>
 
@@ -375,16 +377,16 @@ button{font:inherit;color:inherit}
   <h2>What this suggests</h2>
   <p>The ultimate goal of genetic perturbation studies is not simply to understand how genes regulate one another, but to identify interventions that produce meaningful changes in cellular function. In immunotherapy the therapeutic benefit of engineered T&nbsp;cells depends on their ability to proliferate, persist, recognize tumors and eliminate malignant cells. Decades of functional screening have generated extensive experimental evidence, but it remains scattered, with inconsistent annotations and effect conventions that make it hard to integrate.</p>
   <p>AI agents offer a scalable way to turn that fragmented literature into training data. The T Cell Function Corpus preserves not only perturbation effects but the experimental conditions needed to interpret them &mdash; particularly important for functional screens, where the same gene can behave differently depending on cell type, modality, stimulation and measured phenotype.</p>
-  <p>Combinatorial nomination is a natural extension, and a harder one. Our current strategy ranks candidate gene pairs by combining predicted individual effects with the similarity of their FuncMapTab embeddings, which prioritizes combinations from a large search space using existing single-gene data. But the assumption that strong individual effects and functional dissimilarity predict beneficial combinations is a simplification: genetic interactions can be synergistic, antagonistic or compensatory in ways that single perturbations do not reveal. Expanding the corpus to large-scale combinatorial screens is the path to models that predict true genetic synergy.</p>
+  <p>Combinatorial nomination is a natural extension, and a harder one. Our current strategy ranks candidate gene pairs by combining predicted individual effects with the similarity of their FuncMap embeddings, which prioritizes combinations from a large search space using existing single-gene data. But the assumption that strong individual effects and functional dissimilarity predict beneficial combinations is a simplification: genetic interactions can be synergistic, antagonistic or compensatory in ways that single perturbations do not reveal. Expanding the corpus to large-scale combinatorial screens is the path to models that predict true genetic synergy.</p>
 </section>
 
 <section id="data">
   <h2>Data and code</h2>
-  <p>The T Cell Function Corpus, the curation schema and FuncMapTab training and evaluation code are released for research use.</p>
+  <p>The T Cell Function Corpus, the curation schema and FuncMap training and evaluation code are released for research use.</p>
   <ul class="plain">
     <li><strong><a href="DATA_URL">Corpus download</a></strong> &mdash; standardized screens, assay instances and gene-level effect tables with full metadata.</li>
     <li><strong><a href="SCHEMA_URL">Metadata schema</a></strong> &mdash; the seven-block schema and direction conventions used by the curation agent.</li>
-    <li><strong><a href="https://github.com/yuncongmao/t-cell-function-corpus">FuncMapTab</a></strong> &mdash; model code, weights and benchmark reproduction scripts.</li>
+    <li><strong><a href="https://github.com/yuncongmao/t-cell-function-corpus">FuncMap</a></strong> &mdash; model code, weights and benchmark reproduction scripts.</li>
   </ul>
   <p>Correspondence to <a href="mailto:jamesz@stanford.edu">jamesz@stanford.edu</a> and <a href="mailto:troth@stanford.edu">troth@stanford.edu</a>.</p>
 </section>
