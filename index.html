@@ -183,6 +183,58 @@ button{font:inherit;color:inherit}
 .cite-copy:hover{color:var(--ink);border-color:var(--ink)}
 @media (max-width:560px){.cite pre{padding-top:44px}}
 
+/* native figures */
+.fx{margin:34px 0 40px;clear:both}
+.fx-h{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.fx-ctrls{display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:16px}
+.fx-g{display:flex;align-items:center;gap:8px}
+.fx-gl{font-family:var(--sans);font-size:11px;color:var(--ink-4);letter-spacing:.03em}
+.fx-gb{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:#fff}
+.fx-gb button{font-family:var(--sans);font-size:12.5px;padding:5px 11px;border:0;background:#fff;color:var(--ink-2);cursor:pointer;border-right:1px solid var(--rule)}
+.fx-gb button:last-child{border-right:0}
+.fx-gb button:hover{background:var(--tint)}
+.fx-gb button.on{background:var(--ink);color:#fff}
+.fx-gb button.off{color:var(--rule-2);cursor:default;background:var(--tint)}
+.fx-plot{width:100%}
+.fx-row{cursor:default}
+.fx-row:hover rect:first-child,.fx-row:focus rect:first-child{fill:var(--tint)}
+.fx-row:focus{outline:none}
+.fx-seg rect{transition:opacity .15s}
+.fx-seg:hover rect{opacity:.78}
+.fx-note{font-family:var(--sans);font-size:12.5px;line-height:1.55;color:var(--ink-3);margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);min-height:44px}
+.fx-k{font-weight:600;color:var(--ink)}
+.fx-d{color:var(--ink-2);font-variant-numeric:tabular-nums;margin-top:3px}
+.fx-empty{font-family:var(--sans);font-size:13px;color:var(--ink-3)}
+.fx-cap{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin:14px 0 0}
+.fx-cap b{color:var(--ink);font-weight:600}
+details.fx-src{margin-top:16px}
+details.fx-src summary{font-family:var(--sans);font-size:12.5px;color:var(--ink-3);cursor:pointer;list-style:none}
+details.fx-src summary::-webkit-details-marker{display:none}
+details.fx-src summary::after{content:" \203a";display:inline-block;transition:transform .2s}
+details.fx-src[open] summary::after{transform:rotate(90deg)}
+details.fx-src summary:hover{color:var(--ink)}
+details.fx-src .in{margin-top:14px}
+details.fx-src img{width:100%;height:auto;display:block}
+
+.fx-comp{display:grid;gap:18px}
+.fx-crow{display:grid;grid-template-columns:130px 1fr;gap:14px;align-items:start}
+.fx-cname{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);text-align:right;padding-top:2px}
+.fx-ctrack{display:flex;height:22px;border-radius:3px;overflow:hidden;gap:1.5px}
+.fx-cseg{display:flex;align-items:center;transition:opacity .15s;min-width:2px}
+.fx-cseg:hover{opacity:.78}
+.fx-cseg span{font-family:var(--sans);font-size:11px;padding-left:7px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fx-ckeys{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px}
+.fx-ckey{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.fx-sw{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+@media(max-width:640px){.fx-crow{grid-template-columns:1fr;gap:6px}.fx-cname{text-align:left}}
+
+@media(max-width:640px){
+.fx-ctrls{gap:10px 12px}
+.fx-g{flex-wrap:wrap;max-width:100%}
+.fx-gb{flex-wrap:wrap;max-width:100%}
+.fx-gb button{padding:5px 9px;font-size:12px}
+}
+
 /* footer */
 .site-footer{border-top:1px solid var(--rule);padding:26px 24px 34px;display:flex;justify-content:space-between;align-items:center;gap:8px 24px;flex-wrap:wrap;font-family:var(--sans);font-size:12.5px;color:var(--ink-4)}
 .site-footer a{color:var(--ink-3);text-decoration:none}
@@ -268,18 +320,22 @@ button{font:inherit;color:inherit}
   </div>
   <p class="cap">Studies published between 2018 and 2026.</p>
 
-  <ul class="plain">
-    <li><strong>Species</strong> &mdash; 83 human, 28 mouse and 2 rat screens, with 822,304, 333,054 and 104,467 effect measurements respectively.</li>
-    <li><strong>Antigen receptor</strong> &mdash; 75 TCR-based and 38 CAR&nbsp;T screens (886,745 and 373,080 effects), capturing both endogenous and engineered systems.</li>
-    <li><strong>Modality</strong> &mdash; CRISPR nuclease loss-of-function dominates (70 screens; 1,057,410 effects), followed by CRISPRa (7; 149,984), CRISPRi (3; 37,572), knock-in (30; 3,060) and transgene overexpression (3; 11,799).</li>
-    <li><strong>Phenotype</strong> &mdash; across the 182 assay instances, persistence is the most common readout (56), followed by proliferation (47), protein expression (46), trafficking (18) and differentiation (8), with further measurements of effector function and viability.</li>
-  </ul>
+  <div class="fx">
+    <div class="fx-h">What the corpus contains</div>
+    <div id="fx-corpus"></div>
+    <p class="fx-cap">Screens and gene-level effects by species, antigen receptor, perturbation modality and library scale. Switch between counts above; hover a segment for its share. CRISPR nuclease loss-of-function dominates the effect counts, while focused libraries dominate the screen counts.</p>
+  </div>
 
   <p>These outcomes were interrogated under diverse conditions &mdash; tumor challenge (45 assays), marker-based sorting (44), chronic stimulation (28), proliferation-based selection (26), in&nbsp;vivo trafficking (12), activation (8), infection (8) and immunosuppression (6). Preserving those contexts alongside the readouts is what distinguishes proliferation under acute activation from sustained expansion or persistence during repeated antigen exposure.</p>
 
   <div class="update-note">
     <p><b>Compared with BioGRID ORCS.</b> Among 37 PubMed-indexed publications, 30 studies and roughly 94 screens were absent from ORCS, which also lacked 12 of 34 assay instances from overlapping studies &mdash; including eight in&nbsp;vivo tumor and spleen readouts.</p>
     <p>Our corpus captures 33 metadata dimensions against 16, and across 25 shared screens distinguishes nine specific functional readouts (IL-2, IFN-&gamma; and TNF production among them) where ORCS has two broad categories. Where the two overlap, quantitative effects agree essentially perfectly: Spearman &rho;&nbsp;&ge;&nbsp;0.9999 in 25 of 25 screens.</p>
+  </div>
+
+  <div class="fx">
+    <div id="fx-orcs"></div>
+    <p class="fx-cap">Coverage against <b>BioGRID ORCS</b>, the largest existing screen repository. Red is this corpus; grey is ORCS; the right-hand figure is the ratio.</p>
   </div>
 </section>
 
@@ -332,10 +388,15 @@ button{font:inherit;color:inherit}
     <li><strong>Unseen study</strong> &mdash; all screens from the target publication are excluded, with K revealed genes to guide prediction.</li>
   </ul>
 
-  <figure class="fig wide">
-    <img src="static/images/fig4.png" alt="The three prediction tasks and benchmark results against statistical, machine learning and single-cell foundation model baselines.">
-    <figcaption><span class="lab">Figure 4.</span> <b>(a)</b> The three evaluation tasks; schematic colours are illustrative. <b>(b&ndash;d)</b> Spearman correlation of the signed effect and pooled-hit AUROC for imputation (b), unseen screens (c) and unseen studies (d), with 10, 50 or 200 revealed genes in c and d. Bars show the mean of five runs and black lines the s.d. over runs. Difference panels show FuncMap minus each baseline with percentile 95% intervals from 20,000 study bootstraps; filled markers denote <em>q</em>&nbsp;&lt;&nbsp;0.05 (paired sign-flip test over studies, Benjamini&ndash;Hochberg across 111 contrasts). Y axes are broken, so bar heights are not comparable between values of K. <a class="full" href="static/images/fig4.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
-  </figure>
+  <div class="fx">
+    <div class="fx-h">Benchmark — effect ranking and hit detection</div>
+    <div id="fx-fig4"></div>
+    <p class="fx-cap">Mean of five runs; black lines are the s.d. over runs and the open dots the five individual runs. The right-hand column gives FuncMap minus that baseline: ★ marks <em>q</em>&nbsp;&lt;&nbsp;0.05 and ▲ a baseline significantly ahead of FuncMap. Hover or tab through a row for the paired difference, its 95% bootstrap interval and <em>q</em>. Drawn live from the paper’s Source Data.</p>
+    <details class="fx-src"><summary>The figure as it appears in the paper</summary>
+      <div class="in"><img src="static/images/fig4.png" alt="The three prediction tasks and benchmark results against statistical, machine learning and single-cell foundation model baselines." loading="lazy">
+      <p class="fx-cap"><span class="lab">Figure 4.</span> <b>(a)</b> The three evaluation tasks; schematic colours are illustrative. <b>(b&ndash;d)</b> Spearman correlation of the signed effect and pooled-hit AUROC for imputation (b), unseen screens (c) and unseen studies (d), with 10, 50 or 200 revealed genes in c and d. Bars show the mean of five runs and black lines the s.d. over runs. Difference panels show FuncMap minus each baseline with percentile 95% intervals from 20,000 study bootstraps; filled markers denote <em>q</em>&nbsp;&lt;&nbsp;0.05 (paired sign-flip test over studies, Benjamini&ndash;Hochberg across 111 contrasts). Y axes are broken, so bar heights are not comparable between values of K.</p></div>
+    </details>
+  </div>
 
   <div class="tw">
     <table class="heat">
@@ -358,10 +419,15 @@ button{font:inherit;color:inherit}
   <p>Knowing whether a perturbation <em>increases</em> or <em>decreases</em> the measured phenotype is essential for interpreting it. A researcher may want knockouts that raise cytokine production, or lower an exhaustion marker; a useful model must distinguish the direction of an effect, not merely identify genes that affect the phenotype.</p>
   <p>FuncMap's largest advantage was in identifying enriched hits: on imputation its enriched-hit AUROC was 0.824 against 0.700 for Kumo, the strongest baseline, and the gap held when whole screens or studies were excluded &mdash; 0.824 against 0.702 for unseen screens and 0.757 against 0.663 (AssayFormer) for unseen studies, both at K&nbsp;=&nbsp;200. In an unseen screen with 200 measured genes, its top 50 predictions recovered <strong>38.5%</strong> of enriched hits against 31.3% for Kumo.</p>
 
-  <figure class="fig wide">
-    <img src="static/images/fig5.png" alt="Directional hit prioritization for enriched and depleted perturbations across the three tasks.">
-    <figcaption><span class="lab">Figure 5.</span> <b>Direction-specific hit ranking across the three evaluation tasks, in five repeated runs.</b> <b>(a)</b> Imputation within a screen (Task 1). <b>(b)</b> Unseen screen (Task 2). <b>(c)</b> Unseen study (Task 3). Top rows, enriched hits; bottom rows, depleted hits. FuncMap&#x27;s enriched score is its enriched expert and its depleted score is the negative of the backbone&#x27;s signed prediction. Baselines use the two orientations of their signed prediction, except AssayFormer, whose enriched and depleted rankings are separate passes with an &quot;increases&quot; or &quot;decreases&quot; phenotype description. Each run gives a study-equal mean (assays averaged within families, families within studies; n = 20-21 studies). Bars show the mean of the five runs and black lines the s.d. over the five runs. The runs are the original benchmark run plus four with a new seed and a new random draw of the revealed genes (Tasks 2-3) or folds (Task 1); the FuncMap backbone was trained once and is shared by all runs, and the enriched expert is re-trained in every run. AUROC and average precision are calculated among genes with a known direction label. Precision@50 is the lower-bound precision among the top 50 genes, with unlabelled genes kept in the denominator; Recall@50 is the fraction of all confirmed hits of that direction found in the top 50. Stack and PIE have no value at K = 10. A double slash marks axes that start above zero. Paired study-level tests of FuncMap against every baseline are given in the Source Data. <a class="full" href="static/images/fig5.png" target="_blank" rel="noopener">Full&nbsp;resolution&nbsp;&#8599;</a></figcaption>
-  </figure>
+  <div class="fx">
+    <div class="fx-h">Direction-specific hit ranking</div>
+    <div id="fx-fig5"></div>
+    <p class="fx-cap">Enriched and depleted hits are ranked separately. Mean of five runs with s.d.; switch direction, task, revealed-gene count and metric above. Hover a row for the paired study-level difference against FuncMap. Drawn live from the paper’s Source Data.</p>
+    <details class="fx-src"><summary>The figure as it appears in the paper</summary>
+      <div class="in"><img src="static/images/fig5.png" alt="Directional hit prioritization for enriched and depleted perturbations across the three tasks." loading="lazy">
+      <p class="fx-cap"><span class="lab">Figure 5.</span> <b>Direction-specific hit ranking across the three evaluation tasks, in five repeated runs.</b> <b>(a)</b> Imputation within a screen (Task 1). <b>(b)</b> Unseen screen (Task 2). <b>(c)</b> Unseen study (Task 3). Top rows, enriched hits; bottom rows, depleted hits. FuncMap&#x27;s enriched score is its enriched expert and its depleted score is the negative of the backbone&#x27;s signed prediction. Baselines use the two orientations of their signed prediction, except AssayFormer, whose enriched and depleted rankings are separate passes with an &quot;increases&quot; or &quot;decreases&quot; phenotype description. Each run gives a study-equal mean (assays averaged within families, families within studies; n = 20-21 studies). Bars show the mean of the five runs and black lines the s.d. over the five runs. The runs are the original benchmark run plus four with a new seed and a new random draw of the revealed genes (Tasks 2-3) or folds (Task 1); the FuncMap backbone was trained once and is shared by all runs, and the enriched expert is re-trained in every run. AUROC and average precision are calculated among genes with a known direction label. Precision@50 is the lower-bound precision among the top 50 genes, with unlabelled genes kept in the denominator; Recall@50 is the fraction of all confirmed hits of that direction found in the top 50. Stack and PIE have no value at K = 10. A double slash marks axes that start above zero. Paired study-level tests of FuncMap against every baseline are given in the Source Data.</p></div>
+    </details>
+  </div>
 
   <h3>From a focused in vivo screen to a genome-wide prediction</h3>
   <p>In&nbsp;vivo perturbation screens commonly rely on small, manually curated libraries, because genome-wide screening in animals remains technically challenging and resource intensive &mdash; one abundance screen alone required 22 tumor-bearing mice. <a href="https://doi.org/10.1038/s41586-026-10906-9" target="_blank" rel="noopener">Liu et&nbsp;al.</a> developed the first genome-wide in&nbsp;vivo CRISPR screens in human T&nbsp;cells, giving a stringent held-out validation set. We emulated the practical setting against it: for each assay, FuncMap received measured effects for 200 genes and predicted effects for roughly 11,200 unmeasured ones.</p>
@@ -430,5 +496,6 @@ button{font:inherit;color:inherit}
   });
 })();
 </script>
+<script src="assets/figs.js" defer></script>
 </body>
 </html>
