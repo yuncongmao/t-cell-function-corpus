@@ -23,7 +23,7 @@
   --serif:"Iowan Old Style","Source Serif 4",Georgia,serif;
   --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --col:700px;
+  --col:1000px;   /* text column and figures share this width */
   color-scheme:light;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -109,25 +109,12 @@ button{font:inherit;color:inherit}
 .post a:hover{text-decoration-color:var(--ink)}
 [data-k]{font-variant-numeric:lining-nums}
 
-/* sidenotes — the numeral is the speck of colour */
-.snr{counter-increment:sn 1}
-.snr::after{content:counter(sn);font-family:var(--sans);font-size:10.5px;font-weight:600;vertical-align:super;line-height:0;margin-left:2px}
-.sn{display:block;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin:10px 0 14px;padding-left:14px;border-left:2px solid var(--rule)}
-.sn::before{content:counter(sn) "  ";font-weight:600;white-space:pre}
-.c-a .snr::after,.sn.c-a::before{color:var(--a)} .sn.c-a{border-left-color:var(--a)}
-.c-c .snr::after,.sn.c-c::before{color:var(--c)} .sn.c-c{border-left-color:var(--c)}
-.c-g .snr::after,.sn.c-g::before{color:var(--g)} .sn.c-g{border-left-color:var(--g)}
-.c-t .snr::after,.sn.c-t::before{color:var(--t)} .sn.c-t{border-left-color:var(--t)}
-@media (min-width:1180px){
-  .sn{float:right;clear:right;width:200px;margin:5px -240px 16px 0;padding-left:12px}
-}
-
 /* figures */
 .fig{margin:40px 0 44px;clear:both}
 .fig img{width:100%;height:auto;display:block}
-.fig.wide{width:min(1000px,calc(100vw - 32px));position:relative;left:50%;transform:translateX(-50%)}
-.fig.hero-fig{width:min(1000px,calc(100vw - 32px));margin:52px auto 0}
-.fig figcaption{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin:16px auto 0;max-width:var(--col)}
+.fig.wide{width:100%}
+.fig.hero-fig{width:min(var(--col),calc(100vw - 32px));margin:52px 0 0;position:relative;left:50%;transform:translateX(-50%)}
+.fig figcaption{font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--ink-3);margin:16px auto 0;max-width:100%}
 .fig .full{white-space:nowrap;color:var(--ink-2);text-decoration:underline;text-decoration-color:var(--rule-2);text-underline-offset:3px}
 .fig figcaption .lab{font-weight:600;color:var(--ink)}
 .fig figcaption b{font-weight:600;color:var(--ink-2)}
@@ -301,8 +288,7 @@ details.fx-src img{width:100%;height:auto;display:block}
 <section>
   <h2>Transcriptional response is not functional outcome</h2>
   <p>Understanding how genetic perturbations affect cellular function is a central goal of T&nbsp;cell engineering, with direct implications for cancer therapeutics. Recent perturbation models have made real progress in predicting transcriptional responses &mdash; but a change in gene expression does not necessarily translate into proliferation, persistence, or cytotoxicity.</p>
-  <p class="c-a">Learning those relationships has been limited by the absence of a unified functional screening dataset.<span class="snr"></span> Published studies remain scattered across heterogeneous supplementary tables, with inconsistent experimental annotations, phenotype definitions and effect-size conventions.</p>
-  <span class="sn c-a">A functional screen is defined not only by the perturbed gene, but by the cellular system, perturbation modality, experimental context, assay and statistical comparison used to quantify its effect. Even the sign of an effect can mean different things in different assays.</span>
+  <p>Learning those relationships has been limited by the absence of a unified functional screening dataset. Published studies remain scattered across heterogeneous supplementary tables, with inconsistent experimental annotations, phenotype definitions and effect-size conventions.</p>
   <p>We introduce the <strong>T Cell Function Corpus</strong>, a standardized atlas of functional genetic perturbation screens assembled by an AI curation agent, and <strong>FuncMap</strong>, a tabular transformer that learns transferable relationships between perturbations and functional phenotypes across experimental contexts. Evaluated on held-out studies, FuncMap consistently outperformed statistical, machine-learning and single-cell foundation-model baselines at predicting perturbation effect rankings and identifying functional hits. With only a small number of measured genes from a new screen, it can predict effects for unmeasured perturbations &mdash; a practical way to extend focused experiments beyond their original scope.</p>
 </section>
 
@@ -342,8 +328,7 @@ details.fx-src img{width:100%;height:auto;display:block}
 <section id="curator">
   <h2>An agent that reads the literature</h2>
   <p>To build the corpus at scale we developed <strong>T-Cell Curator</strong>, an AI agent that extracts and standardizes metadata and quantitative perturbation effects directly from publications and their supplementary materials. A discovery agent searches for relevant studies, a retrieval agent collects manuscripts and associated materials, and an extraction agent performs the extraction, using the schema as its manual.</p>
-  <p class="c-c">The extraction workflow is a multi-agent system coordinated by a GPT-5.5 orchestrator across three stages. An <em>inventory</em> agent examines the manuscript to identify all reported screens, experimental conditions and functional readouts. A <em>triage</em> agent examines the corresponding supplementary tables to confirm or reject candidate screens, resolve discrepancies between manuscript and data, and locate quantitative measurements. An <em>extraction</em> agent then annotates the seven metadata blocks and links each screen and readout to its gene-level effects.<span class="snr"></span></p>
-  <span class="sn c-c">During the first five iterations, expert feedback was reviewed by a reflection agent that converted recurring errors into reusable guidelines, accumulated in a shared playbook and folded into later extraction prompts.</span>
+  <p>The extraction workflow is a multi-agent system coordinated by a GPT-5.5 orchestrator across three stages. An <em>inventory</em> agent examines the manuscript to identify all reported screens, experimental conditions and functional readouts. A <em>triage</em> agent examines the corresponding supplementary tables to confirm or reject candidate screens, resolve discrepancies between manuscript and data, and locate quantitative measurements. An <em>extraction</em> agent then annotates the seven metadata blocks and links each screen and readout to its gene-level effects. During the first five iterations, expert feedback was reviewed by a reflection agent that converted recurring errors into reusable guidelines, accumulated in a shared playbook and folded into later extraction prompts.</p>
 
   <figure class="fig wide">
     <img src="static/images/fig2.png" alt="T-Cell Curator multi-agent workflow and extraction benchmark results.">
@@ -410,8 +395,7 @@ details.fx-src img{width:100%;height:auto;display:block}
       </tbody>
     </table>
   </div>
-  <p class="cap c-g">Mean of five runs. Across the 111 paired comparisons in Figure 4, FuncMap was significantly ahead in 109 and no baseline was significantly ahead. The two exceptions are imputation Spearman &rho;, where FuncMap and Kumo tie (unshaded above), and unseen-screen &rho; at K&nbsp;=&nbsp;10 against kNN. On imputation, Stack and PIE &mdash; both trained on transcriptomes &mdash; fell below the gene-mean baseline.<span class="snr"></span></p>
-  <span class="sn c-g">Representations optimized for transcriptional response do not necessarily capture what matters for downstream cellular function. This does not imply transcriptomic data lack predictive value &mdash; molecular and functional measurements simply reflect different aspects of the response.</span>
+  <p class="cap">Mean of five runs. Across the 111 paired comparisons in Figure 4, FuncMap was significantly ahead in 109 and no baseline was significantly ahead. The two exceptions are imputation Spearman &rho;, where FuncMap and Kumo tie (unshaded above), and unseen-screen &rho; at K&nbsp;=&nbsp;10 against kNN. On imputation, Stack and PIE &mdash; both trained on transcriptomes &mdash; fell below the gene-mean baseline, suggesting that representations optimized for transcriptional response do not necessarily capture what matters for downstream cellular function.</p>
 
   <p>In the unseen-screen task, FuncMap had the highest mean Spearman &rho; and hit AUROC at every tested anchor count. Its AUROC margin over the next-best method was largest when few genes were revealed (0.763 against 0.710 for CatBoost at K&nbsp;=&nbsp;10) and narrowed as more measurements became available. With 200 measured genes it reached &rho;&nbsp;=&nbsp;0.392 and AUROC&nbsp;=&nbsp;0.829 &mdash; matching its imputation performance despite exclusion of the target screen and its same-readout siblings. A focused screen of a few hundred genes can therefore support prediction across a much larger set of unmeasured perturbations.</p>
 
