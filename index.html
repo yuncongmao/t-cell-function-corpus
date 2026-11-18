@@ -255,7 +255,6 @@ details.fx-src img{width:100%;height:auto;display:block}
 <header class="hero">
   <p class="kick">Stanford &middot; Arc Institute &middot; UCSF</p>
   <h1>Predicting T-cell Function beyond Transcriptome</h1>
-  <p class="dek">A gene-expression change is not a functional outcome</p>
   <p class="byline">
     <span class="au"><a class="au-name" href="https://yuncongtobymao.com/" target="_blank" rel="noopener">Yuncong Mao</a><span class="sep">,</span></span>
     <span class="au"><a class="au-name" href="#" rel="noopener">Emma Dann</a><span class="sep">,</span></span>
@@ -326,7 +325,7 @@ details.fx-src img{width:100%;height:auto;display:block}
 </section>
 
 <section id="curator">
-  <h2>An agent that reads the literature</h2>
+  <h2>A multi-agent system that extracts and harmonizes fragmented literature into a standardized database</h2>
   <p>To build the corpus at scale we developed <strong>T-Cell Curator</strong>, an AI agent that extracts and standardizes metadata and quantitative perturbation effects directly from publications and their supplementary materials. A discovery agent searches for relevant studies, a retrieval agent collects manuscripts and associated materials, and an extraction agent performs the extraction, using the schema as its manual.</p>
   <p>The extraction workflow is a multi-agent system coordinated by a GPT-5.5 orchestrator across three stages. An <em>inventory</em> agent examines the manuscript to identify all reported screens, experimental conditions and functional readouts. A <em>triage</em> agent examines the corresponding supplementary tables to confirm or reject candidate screens, resolve discrepancies between manuscript and data, and locate quantitative measurements. An <em>extraction</em> agent then annotates the seven metadata blocks and links each screen and readout to its gene-level effects.</p>
 
@@ -351,7 +350,7 @@ details.fx-src img{width:100%;height:auto;display:block}
 </section>
 
 <section id="model">
-  <h2>FuncMap</h2>
+  <h2>FuncMap, a tabular transformer that predicts functional phenotypes across different contexts</h2>
   <p>FuncMap is a tabular transformer that learns from functional perturbation measurements across diverse experimental contexts, integrating three sources of information: gene-level effects from previously published screens, experimental metadata describing the target screen, and external biological knowledge about each gene.</p>
   <p>A <em>screen encoder</em> represents experimental conditions &mdash; organism, perturbation modality, antigen receptor, selection pressure, functional readout. A <em>gene-knowledge encoder</em> integrates gene descriptions, Gene Ontology annotations, protein sequences, interaction networks and genetic dependency data. These representations combine with previously measured effects in a tabular transformer that uses row&ndash;column attention to learn relationships across genes and screens. An in-context transformer then lets unmeasured genes attend to a small set of genes with known effects in the target screen, adapting predictions to the new setting.</p>
   <p>To separate shared genetic effects from context-specific responses, each prediction decomposes into a <em>donor prior</em>, estimated from the gene's effects in related screens, and a <em>predicted deviation</em> learned by the transformer. Together these produce signed effect predictions and functional hit scores.</p>
