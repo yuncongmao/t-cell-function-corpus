@@ -55,7 +55,8 @@ function ticks(lo, hi) {
   for (; t <= hi + 1e-9; t += step) out.push(Math.round(t / step) * step);
   return out;
 }
-window.__fig = { el: el, label: label, tag: tag, fmt: fmt, fmtQ: fmtQ, fetchSet: fetchSet,
+function fetchJSON(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(u);return r.json();});}
+window.__fig = { el: el, label: label, tag: tag, fmt: fmt, fmtQ: fmtQ, fetchSet: fetchSet, fetchJSON: fetchJSON,
   ticks: ticks, FONT: FONT, INK: INK, INK2: INK2, INK3: INK3, INK4: INK4,
   RULE: RULE, TINT: TINT, BAR: BAR, BAR2: BAR2, RED: RED };
 })();
@@ -126,58 +127,99 @@ window.__bench = function (host, data, cfg) {
 function render(plot, note, rs, st, cfg) {
   var F = window.__fig, el = F.el, label = F.label;
   if (!rs.length) { plot.innerHTML = '<p class="fx-empty">Not run in this setting.</p>'; note.textContent = ''; return; }
-  var W = Math.max(300, Math.min(plot.clientWidth || 680, 920));
+  rs = rs.slice().sort(function (a, b) {
+    if (a.arm === 'FuncMap') return 1;
+    if (b.arm === 'FuncMap') return -1;
+    return a.mean - b.mean;
+  });
+  var W = Math.max(320, Math.min(plot.clientWidth || 700, 920));
   var narrow = W < 560;
-  var L = narrow ? 86 : 118, Rm = narrow ? 56 : 150, rowH = 30, top = 10, axH = 26;
-  var H = top + rs.length * rowH + axH;
+  var L = 44, R = 10, T = 26, B = narrow ? 78 : 66;
+  var H = (narrow ? 220 : 270) + T + B;
+  var bw = (W - L - R) / rs.length;
   plot.innerHTML = '';
-  var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', style: 'display:block' }, plot);
+  var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', style: 'display:block;overflow:visible' }, plot);
 
   var isA = /auroc|auc/i.test(st.metric);
   var vals = [];
-  rs.forEach(function (r) { vals.push(r.mean + r.sd); r.runs.forEach(function (v) { vals.push(v); }); });
-  var hi = Math.max.apply(null, vals);
-  var lo = 0, tk = F.ticks(lo, hi * 1.04);
-  var hiA = Math.max(tk[tk.length - 1], hi * 1.02);
-  var X = function (v) { return L + (v - lo) / (hiA - lo) * (W - L - Rm); };
+  rs.forEach(function (r) {
+    vals.push(r.mean + r.sd, r.mean - r.sd);
+    r.runs.forEach(function (v) { vals.push(v); });
+  });
+  var hi = Math.max.apply(null, vals), lo = Math.min.apply(null, vals);
+  var span = Math.max(hi - lo, 1e-6);
+  var base = Math.max(0, lo - span * 0.10);          // zoomed floor, just under the lowest bar
+  var top = hi + span * 0.26;                         // headroom for labels
+  var broken = base > 1e-9;
+  var Y = function (v) { return T + (1 - (v - base) / (top - base)) * (H - T - B); };
+  var tk = F.ticks(base, top).filter(function (t) { return t >= base && t <= top; });
 
   tk.forEach(function (t) {
-    el('line', { x1: X(t), x2: X(t), y1: top - 2, y2: H - axH + 2, stroke: F.RULE }, svg);
-    label(svg, X(t), H - axH + 16, String(+t.toFixed(3)), { size: 11, fill: F.INK4, anchor: 'middle' });
+    el('line', { x1: L - 4, x2: W - R, y1: Y(t), y2: Y(t), stroke: F.RULE }, svg);
+    label(svg, L - 8, Y(t) + 4, String(+t.toFixed(3)), { size: 11, fill: F.INK4, anchor: 'end' });
   });
-  if (isA && hiA > 0.5) {
-    el('line', { x1: X(0.5), x2: X(0.5), y1: top - 2, y2: H - axH + 2, stroke: F.INK4, 'stroke-dasharray': '3 3' }, svg);
-    label(svg, X(0.5), top - 4, 'chance', { size: 10, fill: F.INK4, anchor: 'middle' });
+  if (broken) {
+    var yb = Y(base);
+    [0, 4].forEach(function (dx) {
+      el('line', { x1: L - 10 + dx, x2: L - 4 + dx, y1: yb + 3, y2: yb - 3,
+        stroke: F.INK4, 'stroke-width': 1 }, svg);
+    });
   }
+  if (isA && top > 0.5 && base < 0.5) {
+    el('line', { x1: L - 4, x2: W - R, y1: Y(0.5), y2: Y(0.5), stroke: F.INK4, 'stroke-dasharray': '3 3' }, svg);
+  }
+  el('line', { x1: L - 4, x2: W - R, y1: Y(base), y2: Y(base), stroke: '#d3d2cd' }, svg);
+
   var best = null;
   rs.forEach(function (r) { if (r.arm !== 'FuncMap' && (!best || r.mean > best.mean)) best = r; });
 
   rs.forEach(function (r, i) {
-    var y = top + i * rowH, cy = y + rowH / 2, me = r.arm === 'FuncMap';
+    var x = L + i * bw, cx = x + bw / 2, me = r.arm === 'FuncMap';
     var g = el('g', { class: 'fx-row', tabindex: '0' }, svg);
-    el('rect', { x: 0, y: y, width: W, height: rowH, fill: 'transparent' }, g);
-    label(g, L - 10, cy + 4, NAME[r.arm] || r.arm, { anchor: 'end', size: narrow ? 11.5 : 12.5,
-      fill: me ? F.INK : F.INK2, weight: me ? 600 : 400 });
-    el('rect', { x: X(0), y: cy - 8, width: Math.max(1, X(r.mean) - X(0)), height: 16, rx: 2,
+    el('rect', { x: x, y: T - 18, width: bw, height: H - T - B + 18, fill: 'transparent' }, g);
+    var w = Math.min(bw - 9, 40);
+    el('rect', { x: cx - w / 2, y: Y(r.mean), width: w, height: Math.max(1, Y(base) - Y(r.mean)), rx: 2,
       fill: me ? F.RED : (r === best ? F.BAR2 : F.BAR) }, g);
-    if (r.sd > 0) el('line', { x1: X(r.mean - r.sd), x2: X(r.mean + r.sd), y1: cy, y2: cy,
-      stroke: me ? '#5d1b14' : F.INK3, 'stroke-width': 1.2 }, g);
-    r.runs.forEach(function (v, j) {
-      el('circle', { cx: X(v), cy: cy + (j - 2) * 1.5, r: 2, fill: '#fff',
-        stroke: me ? '#5d1b14' : F.INK3, 'stroke-width': .9 }, g);
-    });
-    label(g, X(r.mean + r.sd) + 9, cy + 4, F.fmt(r.mean), { size: 12, fill: me ? F.INK : F.INK2, weight: me ? 600 : 400 });
-    if (!narrow && r.d) {
-      var ahead = +r.d.diff > 0, sig = r.d.significant === 'True', ag = r.d.significant_against === 'True';
-      var txt = (ahead ? '+' : '−') + F.fmt(Math.abs(+r.d.diff)) + (sig ? ' ★' : ag ? ' ▲' : '');
-      label(g, W - 8, cy + 4, txt, { size: 11.5, anchor: 'end',
-        fill: ag ? '#2f6fb5' : sig ? F.INK2 : F.INK4 });
+    if (r.sd > 0) {
+      el('line', { x1: cx, x2: cx, y1: Y(r.mean - r.sd), y2: Y(r.mean + r.sd),
+        stroke: me ? '#5d1b14' : F.INK3, 'stroke-width': 1.1 }, g);
+      [r.mean - r.sd, r.mean + r.sd].forEach(function (v) {
+        el('line', { x1: cx - 3.5, x2: cx + 3.5, y1: Y(v), y2: Y(v), stroke: me ? '#5d1b14' : F.INK3, 'stroke-width': 1.1 }, g);
+      });
     }
+    r.runs.forEach(function (v, j) {
+      el('circle', { cx: cx + ((j % 5) - 2) * 2.4, cy: Y(v), r: 1.7, fill: '#fff',
+        stroke: me ? '#5d1b14' : F.INK3, 'stroke-width': .8 }, g);
+    });
+    // significance star: FuncMap significantly ahead of this baseline
+    if (r.d && r.d.significant === 'True' && +r.d.diff > 0) {
+      label(g, cx, Y(r.mean + r.sd) - 7, '\u2605', { size: 10, anchor: 'middle', fill: F.INK3 });
+    } else if (r.d && r.d.significant_against === 'True') {
+      label(g, cx, Y(r.mean + r.sd) - 7, '\u25b2', { size: 9, anchor: 'middle', fill: '#2f6fb5' });
+    }
+    if (me) label(g, cx, Y(r.mean + r.sd) - 7, F.fmt(r.mean), { size: 11.5, anchor: 'middle', weight: 600, fill: F.INK });
+    var lb = label(g, cx, H - B + 14, NAME[r.arm] || r.arm,
+      { size: narrow ? 10 : 11, anchor: 'end', fill: me ? F.INK : F.INK3, weight: me ? 600 : 400 });
+    lb.setAttribute('transform', 'rotate(-40 ' + cx + ' ' + (H - B + 14) + ')');
     var hov = function () { say(note, r, best, st, cfg); };
     g.addEventListener('mouseenter', hov);
     g.addEventListener('focus', hov);
   });
-  say(note, rs[0], best, st, cfg);
+  var fm = null;
+  rs.forEach(function (r) { if (r.arm === 'FuncMap') fm = r; });
+  if (fm && best && fm.mean > best.mean) {
+    var bi = rs.indexOf(best), fi = rs.indexOf(fm);
+    var bx = L + bi * bw + bw / 2, fx = L + fi * bw + bw / 2;
+    var yb = Y(best.mean), yf = Y(fm.mean);
+    el('line', { x1: bx, x2: fx + 2, y1: yb, y2: yb, stroke: F.INK4,
+      'stroke-dasharray': '2 3', 'stroke-width': 1 }, svg);
+    el('line', { x1: fx + 2, x2: fx + 2, y1: yb, y2: yf, stroke: F.RED, 'stroke-width': 1.3 }, svg);
+    el('path', { d: 'M ' + (fx - 1) + ' ' + (yf + 4) + ' L ' + (fx + 2) + ' ' + yf + ' L ' + (fx + 5) + ' ' + (yf + 4),
+      stroke: F.RED, fill: 'none', 'stroke-width': 1.3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+    label(svg, fx - Math.min(bw - 9, 40) / 2 - 5, (yb + yf) / 2 + 3.5, '+' + F.fmt(fm.mean - best.mean),
+      { size: 10.5, fill: F.RED, weight: 600, anchor: 'end' });
+  }
+  say(note, fm || rs[rs.length - 1], best, st, cfg);
 }
 
 function say(note, r, best, st, cfg) {
@@ -289,6 +331,166 @@ window.__orcs = function (host) {
 };
 })();
 
+/* ── in vivo screen design (Figure 6) ───────────────────────── */
+(function () {
+'use strict';
+var F = window.__fig, el = F.el, label = F.label, tag = F.tag;
+var STEPS = [
+  ['Curated library', '~200 genes', 'chosen by hand for an in vivo screen'],
+  ['In vivo screen', 'tumor-bearing mice', 'measure the effect of every gene in the library'],
+  ['FuncMap', '200 anchors', 'measured genes anchor a genome-wide in silico screen'],
+  ['Genome-wide', '~11,200 genes', 'predicted effects for every unmeasured gene'],
+  ['Wet lab', 'top candidates', 'hits passing prespecified thresholds tested next']
+];
+
+window.__flow = function (host) {
+  function draw() {
+    var W = Math.max(320, Math.min(host.clientWidth || 700, 1000));
+    var narrow = W < 680;
+    host.innerHTML = '';
+    if (narrow) {
+      var ol = tag('div', 'flow-v', host);
+      STEPS.forEach(function (s, i) {
+        var r = tag('div', 'flow-step' + (i === 2 ? ' hi' : ''), ol);
+        tag('div', 'n', r, String(i + 1));
+        var b = tag('div', '', r);
+        tag('div', 'h', b, s[0]);
+        tag('div', 'q', b, s[1]);
+        tag('div', 'd', b, s[2]);
+      });
+      return;
+    }
+    var H = 128, gap = 14, bw = (W - gap * (STEPS.length - 1)) / STEPS.length;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', style: 'display:block' }, host);
+    STEPS.forEach(function (s, i) {
+      var x = i * (bw + gap), g = el('g', {}, svg);
+      var hi = i === 2;
+      el('rect', { x: x, y: 16, width: bw, height: 86, rx: 8,
+        fill: hi ? 'rgba(181,54,43,.06)' : '#fff',
+        stroke: hi ? '#b5362b' : '#e7e6e2', 'stroke-width': hi ? 1.4 : 1 }, g);
+      label(g, x + 12, 38, s[0], { size: 12.5, weight: 600, fill: hi ? '#b5362b' : F.INK });
+      label(g, x + 12, 55, s[1], { size: 11.5, fill: F.INK3 });
+      var words = s[2].split(' '), line = '', y = 73;
+      words.forEach(function (w) {
+        if ((line + ' ' + w).length > Math.floor((bw - 24) / 5.1)) {
+          label(g, x + 12, y, line, { size: 10.5, fill: F.INK4 });
+          line = w; y += 12;
+        } else line = line ? line + ' ' + w : w;
+      });
+      if (line) label(g, x + 12, y, line, { size: 10.5, fill: F.INK4 });
+      if (i < STEPS.length - 1) {
+        var ax = x + bw + gap / 2;
+        el('path', { d: 'M ' + (ax - 4) + ' 59 L ' + (ax + 4) + ' 59 M ' + (ax + 1) + ' 56 L ' + (ax + 4) + ' 59 L ' + (ax + 1) + ' 62',
+          stroke: F.INK4, 'stroke-width': 1.3, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+      }
+    });
+  }
+  draw();
+  addEventListener('resize', draw);
+};
+
+var ORDER = ['Gene mean', 'kNN', 'SVD', 'Stack', 'PIE', 'CatBoost', 'AssayFormer', 'TabICL', 'Kumo', 'FuncMap'];
+
+window.__fig6 = function (host, payload) {
+  var metrics = payload.metrics, D = payload.data;
+  var cur = 'Enriched AUROC';
+  var ctrls = tag('div', 'fx-ctrls', host);
+  var plot = tag('div', 'fx-plot', host);
+  var note = tag('div', 'fx-note', host);
+
+  function bar() {
+    ctrls.innerHTML = '';
+    [['Enriched', metrics.filter(function (m) { return m.indexOf('Enriched') === 0; })],
+     ['Signed', metrics.filter(function (m) { return m.indexOf('Signed') === 0; })],
+     ['Depleted', metrics.filter(function (m) { return m.indexOf('Depleted') === 0; })]
+    ].forEach(function (grp) {
+      if (!grp[1].length) return;
+      var g = tag('div', 'fx-g', ctrls);
+      tag('span', 'fx-gl', g, grp[0]);
+      var box = tag('div', 'fx-gb', g);
+      grp[1].forEach(function (m) {
+        var lbl = m.replace(/^(Enriched|Depleted|Signed) /, '');
+        var b = tag('button', m === cur ? 'on' : '', box, lbl);
+        b.type = 'button';
+        b.onclick = function () { cur = m; bar(); draw(); };
+      });
+    });
+  }
+  function draw() {
+    var vals = D[cur];
+    var names = ORDER.filter(function (n) { return vals[n] != null; });
+    var W = Math.max(320, Math.min(plot.clientWidth || 700, 920));
+    var narrow = W < 560;
+    var L = 46, R = 10, T = 24, B = narrow ? 78 : 66;
+    var H = (narrow ? 210 : 250) + T + B;
+    var bw = (W - L - R) / names.length;
+    plot.innerHTML = '';
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', style: 'display:block;overflow:visible' }, plot);
+    var hi = -Infinity, lo = Infinity;
+    names.forEach(function (n) { hi = Math.max(hi, vals[n]); lo = Math.min(lo, vals[n]); });
+    var span = Math.max(hi - lo, 1e-6);
+    var base = Math.max(0, lo - span * 0.10), top = hi + span * 0.22;
+    var Y = function (v) { return T + (1 - (v - base) / (top - base)) * (H - T - B); };
+    var tk = F.ticks(base, top).filter(function (t) { return t >= base && t <= top; });
+    tk.forEach(function (t) {
+      el('line', { x1: L - 4, x2: W - R, y1: Y(t), y2: Y(t), stroke: F.RULE }, svg);
+      label(svg, L - 8, Y(t) + 4, String(+t.toFixed(3)), { size: 11, fill: F.INK4, anchor: 'end' });
+    });
+    if (base > 1e-9) {
+      [0, 4].forEach(function (dx) {
+        el('line', { x1: L - 10 + dx, x2: L - 4 + dx, y1: Y(base) + 3, y2: Y(base) - 3,
+          stroke: F.INK4, 'stroke-width': 1 }, svg);
+      });
+    }
+    if (/AUROC/.test(cur) && base < 0.5 && top > 0.5) {
+      el('line', { x1: L - 4, x2: W - R, y1: Y(0.5), y2: Y(0.5), stroke: F.INK4, 'stroke-dasharray': '3 3' }, svg);
+      }
+    var best = null;
+    names.forEach(function (n) { if (n !== 'FuncMap' && (best === null || vals[n] > vals[best])) best = n; });
+    names.forEach(function (n, i) {
+      var x = L + i * bw, cx = x + bw / 2, me = n === 'FuncMap';
+      var g = el('g', { class: 'fx-row', tabindex: '0' }, svg);
+      el('rect', { x: x, y: T - 16, width: bw, height: H - T - B + 16, fill: 'transparent' }, g);
+      var w = Math.min(bw - 9, 40);
+      el('rect', { x: cx - w / 2, y: Y(vals[n]), width: w, height: Math.max(1, Y(base) - Y(vals[n])), rx: 2,
+        fill: me ? F.RED : (n === best ? F.BAR2 : F.BAR) }, g);
+      label(g, cx, Y(vals[n]) - 6, F.fmt(vals[n]),
+        { size: me ? 11.5 : 10.5, anchor: 'middle', weight: me ? 600 : 400, fill: me ? F.INK : F.INK4 });
+      var lb = label(g, cx, H - B + 14, n, { size: narrow ? 10 : 11, anchor: 'end',
+        fill: me ? F.INK : F.INK3, weight: me ? 600 : 400 });
+      lb.setAttribute('transform', 'rotate(-40 ' + cx + ' ' + (H - B + 14) + ')');
+      g.addEventListener('mouseenter', function () { say(n); });
+      g.addEventListener('focus', function () { say(n); });
+    });
+    if (vals['FuncMap'] != null && best && vals['FuncMap'] > vals[best]) {
+      var bi = names.indexOf(best), fi = names.indexOf('FuncMap');
+      var bx = L + bi * bw + bw / 2, fx = L + fi * bw + bw / 2;
+      var yb = Y(vals[best]), yf = Y(vals['FuncMap']);
+      el('line', { x1: bx, x2: fx + 2, y1: yb, y2: yb, stroke: F.INK4, 'stroke-dasharray': '2 3', 'stroke-width': 1 }, svg);
+      el('line', { x1: fx + 2, x2: fx + 2, y1: yb, y2: yf, stroke: F.RED, 'stroke-width': 1.3 }, svg);
+      el('path', { d: 'M ' + (fx - 1) + ' ' + (yf + 4) + ' L ' + (fx + 2) + ' ' + yf + ' L ' + (fx + 5) + ' ' + (yf + 4),
+        stroke: F.RED, fill: 'none', 'stroke-width': 1.3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+      label(svg, fx - Math.min(bw - 9, 40) / 2 - 5, (yb + yf) / 2 + 3, '+' + F.fmt(vals['FuncMap'] - vals[best]),
+        { size: 10.5, fill: F.RED, weight: 600, anchor: 'end' });
+    }
+    function say(n) {
+      note.innerHTML = '';
+      tag('span', 'fx-k', note, n);
+      tag('span', 'fx-s', note, ' · ' + cur + ' = ' + F.fmt(vals[n]));
+      if (n !== 'FuncMap') {
+        var d = vals['FuncMap'] - vals[n];
+        tag('div', 'fx-d', note, 'FuncMap − ' + n + ' = ' + (d > 0 ? '+' : '−') + F.fmt(Math.abs(d)));
+      } else {
+        tag('div', 'fx-d', note, 'Strongest baseline here: ' + best + ' at ' + F.fmt(vals[best]) + '.');
+      }
+    }
+    say('FuncMap');
+  }
+  bar(); draw();
+  addEventListener('resize', draw);
+};
+})();
+
 /* ── boot ───────────────────────────────────────────────────── */
 (function () {
 'use strict';
@@ -302,11 +504,13 @@ function boot() {
   if (c) window.__corpus(c);
   var o = document.getElementById('fx-orcs');
   if (o) window.__orcs(o);
+  var fl = document.getElementById('fx-flow');
+  if (fl) window.__flow(fl);
+  var f6 = document.getElementById('fx-fig6');
+  if (f6) F.fetchJSON('assets/data/fig6.json').then(function (d) { window.__fig6(f6, d); })
+    .catch(function () { fail(f6, 'static/images/fig6.png'); });
   [['fx-fig4', 'assets/data/fig4', 'static/images/fig4.png',
-     { metrics: [{ id: 'rho', label: 'Spearman ρ' }, { id: 'auc', label: 'Hit AUROC' }] }],
-   ['fx-fig5', 'assets/data/fig5', 'static/images/fig5.png',
-     { dirs: true, metrics: [{ id: 'AUROC', label: 'AUROC' }, { id: 'AP', label: 'Avg. precision' },
-       { id: 'P_lower50', label: 'Precision@50' }, { id: 'recall50', label: 'Recall@50' }] }]
+     { metrics: [{ id: 'rho', label: 'Spearman \u03c1' }, { id: 'auc', label: 'Hit AUROC' }] }]
   ].forEach(function (spec) {
     var host = document.getElementById(spec[0]);
     if (!host) return;
