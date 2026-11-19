@@ -51,6 +51,10 @@ Promise.all([getJSON('data/genes.json'), getJSON('data/assays.json')])
     initSearch();
     initTabs();
     renderAssayList();
+    addEventListener('hashchange', function () {
+      var g = (location.hash || '').replace(/^#/, '').toUpperCase();
+      if (g && g !== S.gene) { $('#q').value = g; window.showGene(g); }
+    });
     var start = (location.hash || '').replace(/^#/, '').toUpperCase();
     if (start) { $('#q').value = start; showGene(start); }
     else $('#panel-gene').innerHTML =

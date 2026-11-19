@@ -95,6 +95,9 @@ button{font:inherit;color:inherit}
   line-height:1.3;color:var(--ink-2);text-decoration:none;transition:border-color .2s,color .2s,background-color .2s;
 }
 .hero-link:hover{border-color:var(--ink);color:var(--ink);background:#fff}
+.hero-link.big{font-size:16px;font-weight:600;padding:11px 24px;background:var(--ink);color:#fff;border-color:var(--ink)}
+.hero-link.big:hover{background:#000;color:#fff;border-color:#000}
+.hero-link.big svg{width:17px;height:17px}
 .hero-link img{width:16px;height:16px;display:block}
 .hero-link img.arxiv{width:auto;height:17px}
 .hero-link svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -247,8 +250,7 @@ details.fx-src img{width:100%;height:auto;display:block}
     <span>T Cell Function Corpus</span>
   </a>
   <nav class="top-nav" aria-label="Links">
-    <a href="explore.html">Explore</a>
-    <a href="#data">Data</a>
+    <a href="explore.html">Explore the database</a>
     <a href="PAPER_URL" class="ext" rel="noopener"><img src="assets/logos/arxiv.svg" alt="arXiv" class="ext-logo arxiv"><span>Paper</span></a>
     <a href="https://github.com/yuncongmao/t-cell-function-corpus" class="ext" rel="noopener"><img src="assets/logos/github.svg" alt="" class="ext-logo"><span>GitHub</span></a>
   </nav>
@@ -260,8 +262,8 @@ details.fx-src img{width:100%;height:auto;display:block}
   <p class="kick">Stanford &middot; Arc Institute &middot; UCSF</p>
   <h1>Predicting T-cell Function beyond Transcriptome</h1>
   <p class="byline">
-    <span class="au"><a class="au-name" href="https://yuncongtobymao.com/" target="_blank" rel="noopener">Yuncong Mao</a><sup>1,3</sup><span class="sep">,</span></span>
-    <span class="au"><a class="au-name" href="#">Emma Dann</a><sup>4,5</sup><span class="sep">,</span></span>
+    <span class="au"><a class="au-name" href="https://yuncongtobymao.com/" target="_blank" rel="noopener">Yuncong Mao</a><sup>1,3,†</sup><span class="sep">,</span></span>
+    <span class="au"><a class="au-name" href="#">Emma Dann</a><sup>4,5,†</sup><span class="sep">,</span></span>
     <span class="au"><a class="au-name" href="https://x.com/Jiaru_Zou" target="_blank" rel="noopener">Jiaru Zou</a><sup>6</sup><span class="sep">,</span></span>
     <span class="au"><a class="au-name" href="#">Harrison Zhang</a><sup>1</sup><span class="sep">,</span></span>
     <span class="au"><a class="au-name" href="https://seannwu.github.io/" target="_blank" rel="noopener">Sean Wu</a><sup>6</sup><span class="sep">,</span></span>
@@ -272,12 +274,12 @@ details.fx-src img{width:100%;height:auto;display:block}
     <span class="au"><a class="au-name" href="#">Theo Roth</a><sup>2,3,*</sup><span class="sep">,</span></span>
     <span class="au"><a class="au-name" href="https://www.james-zou.com/" target="_blank" rel="noopener">James Zou</a><sup>1,*</sup></span>
   </p>
-  <p class="affil"><sup>1</sup>Department of Biomedical Data Science, Stanford School of Medicine &nbsp;<sup>2</sup>Department of Pathology, Stanford School of Medicine &nbsp;<sup>3</sup>Arc Institute &nbsp;<sup>4</sup>Department of Genetics, Stanford School of Medicine &nbsp;<sup>5</sup>Department of Genetics, University of California San Francisco &nbsp;<sup>6</sup>Department of Computer Science, Stanford University<br><span class="corr-note"><sup>*</sup>Corresponding authors</span></p>
+  <p class="affil"><sup>1</sup>Department of Biomedical Data Science, Stanford School of Medicine &nbsp;<sup>2</sup>Department of Pathology, Stanford School of Medicine &nbsp;<sup>3</sup>Arc Institute &nbsp;<sup>4</sup>Department of Genetics, Stanford School of Medicine &nbsp;<sup>5</sup>Department of Genetics, University of California San Francisco &nbsp;<sup>6</sup>Department of Computer Science, Stanford University<br><span class="corr-note"><sup>†</sup>These authors contributed equally &nbsp;&middot;&nbsp; <sup>*</sup>Corresponding authors</span></p>
   <p class="date">Preprint &middot; 2026</p>
   <p class="hero-links">
     <a class="hero-link" href="PAPER_URL" rel="noopener"><img src="assets/logos/arxiv.svg" alt="arXiv" class="arxiv"><span>Paper</span></a>
+    <a class="hero-link big" href="explore.html"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Explore the data</span></a>
     <a class="hero-link" href="https://github.com/yuncongmao/t-cell-function-corpus" rel="noopener"><img src="assets/logos/github.svg" alt=""><span>Code</span></a>
-    <a class="hero-link" href="explore.html"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><span>Explore the data</span></a>
   </p>
 
   <figure class="fig hero-fig">
