@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Explore the corpus &middot; T Cell Function Corpus</title>
+<meta name="description" content="Search 26,582 genes across 182 functional T cell perturbation assays and see how each gene behaves in different experimental contexts.">
+<link rel="icon" href="assets/logos/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdfcfa; --ink:#111113; --ink-2:#3c3e44; --ink-3:#6a6d75; --ink-4:#9a9ca3;
+  --rule:#e7e6e2; --rule-2:#d3d2cd; --tint:#f5f4f1; --tint-2:#eceae6;
+  --a:#b5362b; --c:#2f6fb5; --g:#c98a1e; --t:#2f7d52;
+  --up:#b5362b; --dn:#2f6fb5;
+  --serif:"Iowan Old Style","Source Serif 4",Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --w:1180px;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:3px}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 24px}
+
+/* header */
+.site-header{position:sticky;top:0;z-index:50;height:56px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;padding:0 24px;background:rgba(253,252,250,.93);backdrop-filter:saturate(1.3) blur(12px);border-bottom:1px solid var(--rule)}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink-3);font-size:13.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.brand:hover{color:var(--ink)}
+.mark{width:24px;height:24px;flex:0 0 auto}
+.top-nav{display:flex;gap:24px;justify-self:end}
+.top-nav a{font-size:15px;color:var(--ink-2);text-decoration:none}
+.top-nav a:hover,.top-nav a.on{color:var(--ink)}
+.top-nav .ext{display:inline-flex;align-items:center;gap:7px}
+.top-nav img{width:16px;height:16px;display:block}
+.top-nav img.arxiv{width:auto;height:16px}
+@media(max-width:760px){.site-header{padding:0 16px}.brand span{display:none}.top-nav{gap:14px}.top-nav a{font-size:13px}}
+
+/* search hero */
+.hero{padding:40px 0 10px;text-align:center}
+.hero h1{font-family:var(--serif);font-size:clamp(26px,3.6vw,34px);font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.hero p.sub{color:var(--ink-3);font-size:15px;margin-top:8px}
+.searchbox{position:relative;max-width:560px;margin:22px auto 0}
+.searchbox input{width:100%;padding:13px 44px 13px 16px;font-size:16px;border:1px solid var(--rule-2);border-radius:11px;background:#fff;font-variant-numeric:tabular-nums}
+.searchbox input:focus{border-color:var(--ink);outline:none}
+.searchbox .ico{position:absolute;right:14px;top:14px;width:18px;height:18px;fill:none;stroke:var(--ink-4);stroke-width:1.8}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--rule);border-radius:11px;box-shadow:0 12px 32px rgba(17,17,19,.1);max-height:340px;overflow:auto;z-index:20;text-align:left}
+.ac div{padding:9px 16px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;font-size:14.5px}
+.ac div:hover,.ac div.sel{background:var(--tint)}
+.ac .n{color:var(--ink-4);font-size:12.5px;font-variant-numeric:tabular-nums}
+.ac mark{background:none;color:var(--a);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:14px}
+.chips span{font-size:12px;color:var(--ink-4)}
+.chips button{font-size:12.5px;padding:4px 11px;border:1px solid var(--rule);background:#fff;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+.chips button:hover{border-color:var(--ink-4);color:var(--ink)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);margin:30px 0 0}
+.tabs button{padding:9px 16px;border:0;background:none;cursor:pointer;font-size:14px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+
+.panel{padding:26px 0 70px}
+.hide{display:none!important}
+.muted{color:var(--ink-3)}
+.loading{color:var(--ink-4);font-size:14px;padding:30px 0}
+
+/* gene header */
+.ghead{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-bottom:4px}
+.ghead h2{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:-.01em}
+.ghead .alias{font-size:13px;color:var(--ink-4)}
+.gsum{color:var(--ink-2);font-size:14.5px;margin-bottom:20px}
+.gsum b{font-weight:600;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:2px 9px;border-radius:999px;background:var(--tint);color:var(--ink-2)}
+.pill i{width:7px;height:7px;border-radius:50%;display:inline-block;font-style:normal}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-bottom:18px}
+.filters label{font-size:11.5px;color:var(--ink-4);display:flex;align-items:center;gap:6px}
+.filters select{font-size:13px;padding:5px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff;max-width:190px}
+.filters .count{margin-left:auto;font-size:12.5px;color:var(--ink-4);font-variant-numeric:tabular-nums}
+.filters button.clear{font-size:12.5px;border:1px solid var(--rule);background:#fff;border-radius:7px;padding:5px 10px;cursor:pointer;color:var(--ink-3)}
+.filters button.clear:hover{color:var(--ink);border-color:var(--ink-4)}
+
+/* strip plot */
+.strip{margin:6px 0 26px}
+.striprow{display:grid;grid-template-columns:142px 1fr;gap:12px;align-items:center;padding:3px 0}
+.striprow .lab{font-size:12.5px;color:var(--ink-2);text-align:right;line-height:1.3}
+.striprow .lab em{display:block;font-style:normal;font-size:11px;color:var(--ink-4);font-variant-numeric:tabular-nums}
+.axis{font-size:11px;fill:var(--ink-4)}
+.dot{cursor:pointer}
+.dot:hover{stroke:var(--ink);stroke-width:1.4}
+
+/* table */
+table.rows{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+table.rows th{text-align:left;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-4);font-weight:500;padding:0 10px 7px;border-bottom:1px solid var(--rule);white-space:nowrap;cursor:pointer;user-select:none}
+table.rows th:hover{color:var(--ink-2)}
+table.rows th.sorted{color:var(--ink)}
+table.rows th .ar{font-size:9px;margin-left:3px}
+table.rows td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.rows tr:hover td{background:var(--tint)}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.sc{font-weight:600;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.bar{display:inline-block;height:9px;border-radius:2px;vertical-align:middle}
+.ctx{color:var(--ink-3);font-size:12px;line-height:1.45}
+.ctx b{color:var(--ink-2);font-weight:500}
+.srcpill{font-size:11px;padding:1px 7px;border-radius:999px;background:var(--tint-2);color:var(--ink-3);white-space:nowrap}
+.tiny{font-size:11.5px;color:var(--ink-4)}
+
+/* assay browser */
+.alist{display:grid;gap:10px}
+.acard{border:1px solid var(--rule);border-radius:10px;padding:14px 16px;background:#fff;cursor:pointer}
+.acard:hover{border-color:var(--rule-2);box-shadow:0 3px 14px rgba(17,17,19,.045)}
+.acard h4{font-size:14.5px;font-weight:600;margin-bottom:3px}
+.acard .meta{font-size:12.5px;color:var(--ink-3)}
+.acard .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.acard .tags span{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--ink-3)}
+
+/* detail drawer */
+.drawer{position:fixed;inset:0;z-index:90;display:flex;justify-content:flex-end;background:rgba(17,17,19,.22)}
+.drawer .in{width:min(560px,100%);background:var(--paper);height:100%;overflow:auto;padding:24px 26px 60px;border-left:1px solid var(--rule)}
+.drawer h3{font-family:var(--serif);font-size:21px;font-weight:700;margin-bottom:3px;padding-right:30px}
+.drawer .close{position:absolute;top:18px;right:20px;border:1px solid var(--rule);background:#fff;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;line-height:1;color:var(--ink-3)}
+.drawer .close:hover{color:var(--ink)}
+dl.kv{display:grid;grid-template-columns:132px 1fr;gap:7px 14px;font-size:13px;margin-top:16px}
+dl.kv dt{color:var(--ink-4);font-size:12px}
+dl.kv dd{color:var(--ink-2)}
+.toplists{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+.toplists h5{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-4);font-weight:500;margin-bottom:7px}
+.toplists ol{list-style:none;font-size:12.5px}
+.toplists li{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.toplists a{text-decoration:none;color:var(--ink-2)}
+.toplists a:hover{color:var(--ink);text-decoration:underline}
+@media(max-width:620px){.toplists{grid-template-columns:1fr}.striprow{grid-template-columns:1fr;gap:2px}.striprow .lab{text-align:left}}
+
+.tipbox{position:fixed;z-index:100;pointer-events:none;background:var(--ink);color:#fff;padding:9px 11px;border-radius:8px;font-size:12px;line-height:1.5;max-width:300px;box-shadow:0 8px 24px rgba(17,17,19,.25)}
+.tipbox b{font-weight:600}
+.tipbox .s{color:#d7d8db}
+footer.site-footer{border-top:1px solid var(--rule);padding:22px 24px 40px;font-size:12.5px;color:var(--ink-4);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer.site-footer a{color:var(--ink-3);text-decoration:none}
+footer.site-footer a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="T Cell Function Corpus, home">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke-linecap="round">
+      <path d="M9.5 3.5C9.5 10.5 22.5 11.5 22.5 16S9.5 21.5 9.5 28.5" stroke="#111113" stroke-width="1.7"/>
+      <path d="M22.5 3.5C22.5 10.5 9.5 11.5 9.5 16s13 5.5 13 12.5" stroke="#111113" stroke-width="1.7"/>
+      <path d="M11.2 7.6h9.6" stroke="#b5362b" stroke-width="1.7"/>
+      <path d="M14.6 11.4h2.8" stroke="#2f7d52" stroke-width="1.7"/>
+      <path d="M14.6 20.6h2.8" stroke="#c98a1e" stroke-width="1.7"/>
+      <path d="M11.2 24.4h9.6" stroke="#2f6fb5" stroke-width="1.7"/>
+    </svg>
+    <span>T Cell Function Corpus</span>
+  </a>
+  <nav class="top-nav">
+    <a href="index.html">Paper site</a>
+    <a href="explore.html" class="on">Explore</a>
+    <a href="https://github.com/yuncongmao/t-cell-function-corpus" class="ext" rel="noopener">
+      <img src="assets/logos/github.svg" alt=""><span>GitHub</span></a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <section class="hero">
+    <h1>Explore the corpus</h1>
+    <p class="sub">How does a gene behave across different T&nbsp;cell screens? Search <b id="ngenes">26,582</b> genes measured across <b>182</b> functional assays from <b>38</b> studies.</p>
+    <div class="searchbox">
+      <input id="q" type="search" placeholder="Search a gene — PDCD1, TOX, BATF, Regnase-1&hellip;" autocomplete="off" spellcheck="false" aria-label="Search genes">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <div class="ac hide" id="ac"></div>
+    </div>
+    <div class="chips"><span>Try</span>
+      <button data-g="PDCD1">PDCD1</button><button data-g="TOX">TOX</button>
+      <button data-g="BATF">BATF</button><button data-g="RASA2">RASA2</button>
+      <button data-g="ZC3H12A">ZC3H12A</button><button data-g="CBLB">CBLB</button></div>
+  </section>
+
+  <div class="tabs">
+    <button id="tab-gene" class="on">Gene</button>
+    <button id="tab-assay">Assays</button>
+  </div>
+
+  <section class="panel" id="panel-gene"><div class="loading">Loading the gene index&hellip;</div></section>
+  <section class="panel hide" id="panel-assay"><div class="loading">Loading assays&hellip;</div></section>
+</div>
+
+<footer class="site-footer">
+  <span>T Cell Function Corpus &middot; data as curated 2026-10-30</span>
+  <span><a href="index.html">Paper site</a> &middot; <a href="https://github.com/yuncongmao/t-cell-function-corpus">GitHub</a></span>
+</footer>
+
+<script src="assets/explore.js" defer></script>
+</body>
+</html>
