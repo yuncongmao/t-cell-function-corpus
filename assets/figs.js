@@ -249,11 +249,11 @@ var F = window.__fig, el = F.el, label = F.label, tag = F.tag;
 var SHADE = ['#111113', '#55585f', '#8d9097', '#bcbdc1', '#dedfe1'];
 
 var GROUPS = [
-  { name: 'Species', parts: [['Human', 83, 822304], ['Mouse', 28, 333054], ['Rat', 2, 104467]] },
-  { name: 'Antigen receptor', parts: [['TCR', 75, 886745], ['CAR', 38, 373080]] },
-  { name: 'Perturbation', parts: [['CRISPR knockout', 70, 1057410], ['Knock-in', 30, 3060],
-      ['CRISPR activation', 7, 149984], ['CRISPR interference', 3, 37572], ['Overexpression', 3, 11799]] },
-  { name: 'Library scale', parts: [['Focused', 58, 56783], ['Genome-wide', 34, 1171120], ['Intermediate', 21, 31922]] }
+  { name: 'Species', parts: [['Human', 123, 822304], ['Mouse', 48, 333054], ['Rat', 11, 104467]] },
+  { name: 'Antigen receptor', parts: [['TCR', 118, 886745], ['CAR', 64, 373080]] },
+  { name: 'Perturbation', parts: [['CRISPR knockout', 132, 1057410], ['Knock-in', 30, 3060],
+      ['CRISPR activation', 10, 149984], ['Overexpression', 7, 11799], ['CRISPR interference', 3, 37572]] },
+  { name: 'Library scale', parts: [['Focused', 85, 10593], ['Genome-wide', 63, 1171120], ['Intermediate', 34, 78112]] }
 ];
 
 window.__corpus = function (host) {
@@ -265,7 +265,7 @@ window.__corpus = function (host) {
     var g = tag('div', 'fx-g', ctrls);
     tag('span', 'fx-gl', g, 'Show');
     var box = tag('div', 'fx-gb', g);
-    [['screens', 'Screens'], ['effects', 'Gene-level effects']].forEach(function (o) {
+    [['screens', 'Assays'], ['effects', 'Gene-level effects']].forEach(function (o) {
       var b = tag('button', mode === o[0] ? 'on' : '', box, o[1]);
       b.type = 'button';
       b.onclick = function () { mode = o[0]; bar(); draw(); };
@@ -287,7 +287,7 @@ window.__corpus = function (host) {
         seg.style.width = pct + '%';
         seg.style.background = SHADE[pi % 5];
         seg.title = p[0] + ' \u2014 ' + p[idx].toLocaleString() + ' ' +
-          (mode === 'screens' ? 'screens' : 'effects') + ' (' + pct.toFixed(1) + '%)';
+          (mode === 'screens' ? 'assays' : 'effects') + ' (' + pct.toFixed(1) + '%)';
         if (pct > 14) { var v = tag('span', '', seg, p[idx].toLocaleString()); v.style.color = pi < 2 ? '#fff' : '#111113'; }
         var key = tag('div', 'fx-ckey', keys);
         var sw = tag('span', 'fx-sw', key); sw.style.background = SHADE[pi % 5];

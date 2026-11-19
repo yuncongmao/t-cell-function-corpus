@@ -135,7 +135,7 @@ button{font:inherit;color:inherit}
 .update-note p+p{margin-top:8px}
 
 /* key numbers — tiny colour ticks */
-.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:34px 0 10px;font-family:var(--sans)}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:34px 0 10px;font-family:var(--sans)}
 .keys div{background:var(--tint);border-radius:4px;padding:13px 10px 12px;text-align:center;position:relative;overflow:hidden}
 .keys div::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
 .keys div:nth-child(1)::before{background:var(--a)}
@@ -326,8 +326,7 @@ details.fx-src img{width:100%;height:auto;display:block}
 
   <div class="keys">
     <div><span class="n" data-k>38</span><span class="l">publications</span></div>
-    <div><span class="n" data-k>113</span><span class="l">screens</span></div>
-    <div><span class="n" data-k>182</span><span class="l">assay instances</span></div>
+    <div><span class="n" data-k>182</span><span class="l">assays</span></div>
     <div><span class="n" data-k>26,582</span><span class="l">genes</span></div>
     <div><span class="n" data-k>1.26M</span><span class="l">gene-level effects</span></div>
   </div>
@@ -336,13 +335,13 @@ details.fx-src img{width:100%;height:auto;display:block}
   <div class="fx">
     <div class="fx-h">What the corpus contains</div>
     <div id="fx-corpus"></div>
-    <p class="fx-cap">Screens and gene-level effects by species, antigen receptor, perturbation modality and library scale. Switch between counts above; hover a segment for its share. CRISPR nuclease loss-of-function dominates the effect counts, while focused libraries dominate the screen counts.</p>
+    <p class="fx-cap">Assays and gene-level effects by species, antigen receptor, perturbation modality and library scale. Switch between counts above; hover a segment for its share. CRISPR nuclease loss-of-function dominates the effect counts, while focused libraries dominate the assay counts.</p>
   </div>
 
   <p>These outcomes were interrogated under diverse conditions &mdash; tumor challenge (45 assays), marker-based sorting (44), chronic stimulation (28), proliferation-based selection (26), in&nbsp;vivo trafficking (12), activation (8), infection (8) and immunosuppression (6). Preserving those contexts alongside the readouts is what distinguishes proliferation under acute activation from sustained expansion or persistence during repeated antigen exposure.</p>
 
   <div class="update-note">
-    <p><b>Compared with BioGRID ORCS.</b> Among 37 PubMed-indexed publications, 30 studies and roughly 94 screens were absent from ORCS, which also lacked 12 of 34 assay instances from overlapping studies &mdash; including eight in&nbsp;vivo tumor and spleen readouts.</p>
+    <p><b>Compared with BioGRID ORCS.</b> Among 37 PubMed-indexed publications, 30 studies and roughly 94 screens were absent from ORCS, which also lacked 12 of 34 measured readouts from overlapping studies &mdash; including eight in&nbsp;vivo tumor and spleen readouts.</p>
     <p>Our corpus captures 33 metadata dimensions against 16, and across 25 shared screens distinguishes nine specific functional readouts (IL-2, IFN-&gamma; and TNF production among them) where ORCS has two broad categories. Where the two overlap, quantitative effects agree essentially perfectly: Spearman &rho;&nbsp;&ge;&nbsp;0.9999 in 25 of 25 screens.</p>
   </div>
 
@@ -452,7 +451,7 @@ details.fx-src img{width:100%;height:auto;display:block}
   <h2>What this suggests</h2>
   <p>The ultimate goal of genetic perturbation studies is not simply to understand how genes regulate one another, but to identify interventions that produce meaningful changes in cellular function. In immunotherapy the therapeutic benefit of engineered T&nbsp;cells depends on their ability to proliferate, persist, recognize tumors and eliminate malignant cells. Decades of functional screening have generated extensive experimental evidence, but it remains scattered, with inconsistent annotations and effect conventions that make it hard to integrate.</p>
   <p>AI agents offer a scalable way to turn that fragmented literature into training data. The T Cell Function Corpus preserves not only perturbation effects but the experimental conditions needed to interpret them &mdash; particularly important for functional screens, where the same gene can behave differently depending on cell type, modality, stimulation and measured phenotype.</p>
-  <p>Combinatorial nomination is a natural extension, and a harder one. Our current strategy ranks candidate gene pairs by combining predicted individual effects with the similarity of their FuncMap embeddings, which prioritizes combinations from a large search space using existing single-gene data. But the assumption that strong individual effects and functional dissimilarity predict beneficial combinations is a simplification: genetic interactions can be synergistic, antagonistic or compensatory in ways that single perturbations do not reveal. Expanding the corpus to large-scale combinatorial screens is the path to models that predict true genetic synergy.</p>
+  <p>What FuncMap ultimately provides is an estimate of how large a perturbation’s effect will be in a context you have not yet run — a given organism, receptor, modality, selection pressure and readout. That turns it into a design tool rather than only an analysis one: it can rank which genes are worth including in a library, flag which contexts are likely to separate candidates, and tell you where a focused experiment will be most informative. The in&nbsp;vivo case above is one instance of that, but the same logic applies to any screen that is expensive enough to be worth planning carefully.</p>
 </section>
 
 <section id="data">
@@ -460,7 +459,6 @@ details.fx-src img{width:100%;height:auto;display:block}
   <p>The T Cell Function Corpus, the curation schema and FuncMap training and evaluation code are released for research use.</p>
   <ul class="plain">
     <li><strong><a href="explore.html">Browse the corpus online</a></strong> &mdash; search any of the 26,582 genes and see its harmonized effect in every assay that measured it, with the full experimental context.</li>
-    <li><strong><a href="DATA_URL">Corpus download</a></strong> &mdash; standardized screens, assay instances and gene-level effect tables with full metadata.</li>
     <li><strong><a href="SCHEMA_URL">Metadata schema</a></strong> &mdash; the seven-block schema and direction conventions used by the curation agent.</li>
     <li><strong><a href="https://github.com/yuncongmao/t-cell-function-corpus">FuncMap</a></strong> &mdash; model code, weights and benchmark reproduction scripts.</li>
   </ul>
@@ -475,8 +473,7 @@ details.fx-src img{width:100%;height:auto;display:block}
   title   = {Predicting T-cell Function beyond Transcriptome},
   author  = {Mao, Yuncong and Dann, Emma and Zou, Jiaru and Zhang, Harrison
              and Wu, Sean and Hartman, Austin and Choi, Yejin
-             and Marson, Alexander and Prichard, Jonathan and Roth, Theo
-             and Zou, James},
+             and Marson, Alexander and Roth, Theo and Zou, James},
   year    = {2026},
   url     = {https://yuncongmao.github.io/t-cell-function-corpus/}
 }</pre>
