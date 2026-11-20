@@ -129,15 +129,23 @@ function initSearch() {
 }
 
 function initTabs() {
-  var tg = $('#tab-gene'), ta = $('#tab-assay');
-  tg.onclick = function () {
-    tg.classList.add('on'); ta.classList.remove('on');
-    $('#panel-gene').classList.remove('hide'); $('#panel-assay').classList.add('hide');
-  };
-  ta.onclick = function () {
-    ta.classList.add('on'); tg.classList.remove('on');
-    $('#panel-assay').classList.remove('hide'); $('#panel-gene').classList.add('hide');
-  };
+  var T = [['#tab-gene', '#panel-gene'], ['#tab-assay', '#panel-assay'], ['#tab-cmp', '#panel-cmp']];
+  T.forEach(function (cur) {
+    var btn = $(cur[0]);
+    if (!btn) return;
+    btn.onclick = function () {
+      T.forEach(function (o) {
+        var b = $(o[0]), p = $(o[1]);
+        if (!b || !p) return;
+        b.classList.toggle('on', o === cur);
+        p.classList.toggle('hide', o !== cur);
+      });
+      if (cur[0] === '#tab-cmp' && window.renderCompare) {
+        window.renderCompare();
+        setTimeout(function () { if (window.__cmpPaint && window.__C.pts.length) window.__cmpPaint(); }, 60);
+      }
+    };
+  });
 }
 
 window.__E = { S: S, $: $, h: h, fnv: fnv, num: num, pval: pval, sup: sup, getJSON: getJSON };
@@ -554,4 +562,427 @@ function drawer(a) {
     });
   });
 }
+})();
+
+/* ── compare: two axes, genes as points ─────────────────────── */
+(function () {
+'use strict';
+var E = window.__E, S = E.S, $ = E.$, h = E.h;
+var C = { axes: null, cache: {}, X: null, Y: null, pts: [], quad: 'all',
+          thr: 0.15, hl: {}, dpr: 1, view: 'ko', minSig: 3 };
+var DEF_X = 'c-proliferation--crisprn', DEF_Y = 'r-t-cell-exhaustion--crisprn';
+
+window.renderCompare = function () {
+  var p = $('#panel-cmp');
+  if (C.axes) return;
+  p.innerHTML = '<div class="loading">Loading axes…</div>';
+  E.getJSON('data/cmp/axes.json').then(function (d) {
+    C.axes = d.axes;
+    build(p);
+  }).catch(function (e) {
+    p.innerHTML = '<p class="loading">Could not load comparison data (' + e.message + ').</p>';
+  });
+};
+
+function axisOptions(sel, cur) {
+  sel.innerHTML = '';
+  var groups = {};
+  C.axes.forEach(function (a) {
+    var g = a.kind === 'cat' ? 'Phenotype group' : 'Specific readout';
+    (groups[g] = groups[g] || []).push(a);
+  });
+  ['Phenotype group', 'Specific readout'].forEach(function (gn) {
+    if (!groups[gn]) return;
+    var og = document.createElement('optgroup');
+    og.label = gn;
+    groups[gn].forEach(function (a) {
+      var o = document.createElement('option');
+      o.value = a.id;
+      o.textContent = a.label + '  · ' + a.modeLabel + '  · ' +
+        a.assays + ' assay' + (a.assays === 1 ? '' : 's') + ', ' + a.genes.toLocaleString() + ' genes';
+      if (a.id === cur) o.selected = true;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function build(p) {
+  p.innerHTML = '';
+  var top = h('div', 'cmp-top', p);
+  ['X', 'Y'].forEach(function (ax) {
+    var box = h('div', 'axbox', top);
+    h('div', 'hd', box, ax + ' axis');
+    var sel = h('select', '', box);
+    sel.id = 'ax' + ax;
+    h('div', 'sub', box, '').id = 'sub' + ax;
+    sel.onchange = function () { load(ax, sel.value); };
+  });
+  axisOptions($('#axX'), DEF_X);
+  axisOptions($('#axY'), DEF_Y);
+
+  var bar = h('div', 'cmp-bar', p);
+  var l1 = h('label', '', bar);
+  l1.appendChild(document.createTextNode('Threshold'));
+  var rg = h('input', '', l1); rg.type = 'range'; rg.min = '0'; rg.max = '0.45';
+  rg.step = '0.01'; rg.value = String(C.thr);
+  var rv = h('span', 'val', l1, C.thr.toFixed(2));
+  rg.oninput = function () { C.thr = +rg.value; rv.textContent = C.thr.toFixed(2); paint(); };
+  var l0 = h('label', '', bar);
+  l0.appendChild(document.createTextNode('Show'));
+  var vb = h('div', 'fx-gb', l0);
+  [['ko', 'Effect of knocking out'], ['role', 'Gene role']].forEach(function (o) {
+    var b = h('button', C.view === o[0] ? 'on' : '', vb, o[1]);
+    b.type = 'button';
+    b.onclick = function () { C.view = o[0]; build($('#panel-cmp')); };
+  });
+  var l3 = h('label', '', bar);
+  l3.appendChild(document.createTextNode('Significant in \u2265'));
+  var mn = h('input', '', l3); mn.type = 'range'; mn.min = '0'; mn.max = '12'; mn.step = '1';
+  mn.value = String(C.minSig);
+  var mv = h('span', 'val', l3, C.minSig ? String(C.minSig) : 'any');
+  mn.oninput = function () {
+    C.minSig = +mn.value;
+    mv.textContent = C.minSig ? String(C.minSig) : 'any';
+    paint();
+  };
+  var l2 = h('label', '', bar);
+  l2.appendChild(document.createTextNode('Highlight'));
+  var sq = h('input', '', l2); sq.type = 'search';
+  sq.placeholder = 'PDCD1, TOX, CBLB…';
+  sq.oninput = function () {
+    C.hl = {};
+    sq.value.toUpperCase().split(/[\s,;]+/).forEach(function (g) { if (g) C.hl[g] = 1; });
+    paint();
+  };
+  h('span', 'count', bar, '').id = 'cmpcount';
+
+  var wrap = h('div', 'cmp-wrap', p);
+  wrap.id = 'cmpwrap';
+  var cv = h('canvas', '', wrap); cv.id = 'cmpcv';
+  var ov = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  ov.id = 'cmpov';
+  wrap.appendChild(ov);
+
+  h('div', '', p).id = 'cmpq';
+  var note = h('p', 'cmp-note', p);
+  note.innerHTML = 'Each point is a gene. For every assay on an axis the gene is ranked within that assay; those ranks are averaged, then ranked again across genes, so both axes spread evenly from <b>−0.5</b> to <b>+0.5</b> and are directly comparable. <b>Significant in ≥</b> keeps only genes called at FDR &lt; 0.1 in at least that many assays, which is what separates real regulators from genes that rank high by chance. Axes stay within one perturbation modality, since a knockout and a CRISPRa effect are not comparable. With <b>Effect of knocking out</b> selected, loss-of-function axes are sign-flipped so right and up mean the knockout raises the phenotype; <b>Gene role</b> shows the corpus’s native convention, where positive means the gene promotes it.';
+
+  load('X', DEF_X, true);
+  load('Y', DEF_Y);
+  addEventListener('resize', paint);
+}
+
+function load(ax, id, quiet) {
+  var a = null;
+  C.axes.forEach(function (x) { if (x.id === id) a = x; });
+  if (!a) return;
+  $('#sub' + ax).textContent = 'loading…';
+  var got = C.cache[id] ? Promise.resolve(C.cache[id])
+    : E.getJSON('data/cmp/' + id + '.json').then(function (d) { C.cache[id] = d; return d; });
+  got.then(function (d) {
+    C[ax] = { meta: a, data: d };
+    C.quad = 'all';
+    $('#sub' + ax).textContent = a.modeLabel + ' · ' + a.assays + ' assay' +
+      (a.assays === 1 ? '' : 's') + ' · ' + a.genes.toLocaleString() + ' genes measured';
+    join();
+  }).catch(function () { $('#sub' + ax).textContent = 'could not load'; });
+}
+
+var LOF = { CRISPRn: 1, CRISPRi: 1 };
+function sign(meta) {
+  return (C.view === 'ko' && LOF[meta.mode]) ? -1 : 1;
+}
+window.__cmpSign = sign;
+function join() {
+  if (!C.X || !C.Y) return;
+  var mx = {}, i, sx = sign(C.X.meta), sy = sign(C.Y.meta);
+  for (i = 0; i < C.X.data.idx.length; i++) mx[C.X.data.idx[i]] = i;
+  C.pts = [];
+  for (i = 0; i < C.Y.data.idx.length; i++) {
+    var gi = C.Y.data.idx[i], j = mx[gi];
+    if (j === undefined) continue;
+    C.pts.push({ g: S.genes[gi][0], x: C.X.data.v[j] * sx, y: C.Y.data.v[i] * sy,
+                 nx: C.X.data.n[j], ny: C.Y.data.n[i],
+                 sx: (C.X.data.s || [])[j] || 0, sy: (C.Y.data.s || [])[i] || 0 });
+  }
+  C.maxSx = 0; C.maxSy = 0;
+  C.pts.forEach(function (p) {
+    if (p.sx > C.maxSx) C.maxSx = p.sx;
+    if (p.sy > C.maxSy) C.maxSy = p.sy;
+  });
+  paint();
+}
+function paint(){ if (window.__cmpPaint) window.__cmpPaint(); }
+window.__C = C;
+window.__cmpJoin = join;
+})();
+
+/* ── compare: plotting ──────────────────────────────────────── */
+(function () {
+'use strict';
+var E = window.__E, $ = E.$, h = E.h, C = window.__C;
+var NS = 'http://www.w3.org/2000/svg';
+var PAD = { l: 66, r: 18, t: 18, b: 52 };
+var geom = null;
+
+function passN(p) {
+  if (!C.minSig) return true;
+  return p.sx + p.sy >= C.minSig;
+}
+function quadOf(p, t) {
+  if (!passN(p)) return null;
+  if (Math.abs(p.x) < t || Math.abs(p.y) < t) return null;
+  return (p.x > 0 ? 'R' : 'L') + (p.y > 0 ? 'T' : 'B');
+}
+
+window.__passN = passN;
+window.__cmpPaint = function () {
+  var wrap = $('#cmpwrap'), cv = $('#cmpcv');
+  if (!wrap || !C.pts.length) return;
+  var W = wrap.clientWidth || 700;
+  var H = Math.max(360, Math.min(Math.round(W * 0.66), 560));
+  var dpr = window.devicePixelRatio || 1;
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.height = H + 'px';
+  var g = cv.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+
+  var lim = 0.5;
+  var X = function (v) { return PAD.l + (v + lim) / (2 * lim) * (W - PAD.l - PAD.r); };
+  var Y = function (v) { return PAD.t + (lim - v) / (2 * lim) * (H - PAD.t - PAD.b); };
+  geom = { X: X, Y: Y, W: W, H: H };
+  var t = C.thr;
+
+  // grid
+  g.strokeStyle = '#e7e6e2'; g.lineWidth = 1;
+  [-0.4, -0.2, 0.2, 0.4].forEach(function (v) {
+    g.beginPath(); g.moveTo(X(v), PAD.t); g.lineTo(X(v), H - PAD.b); g.stroke();
+    g.beginPath(); g.moveTo(PAD.l, Y(v)); g.lineTo(W - PAD.r, Y(v)); g.stroke();
+  });
+  // zero axes
+  g.strokeStyle = '#c9c8c3';
+  g.beginPath(); g.moveTo(X(0), PAD.t); g.lineTo(X(0), H - PAD.b); g.stroke();
+  g.beginPath(); g.moveTo(PAD.l, Y(0)); g.lineTo(W - PAD.r, Y(0)); g.stroke();
+  // threshold lines
+  if (t > 0) {
+    g.strokeStyle = '#d3d2cd'; g.setLineDash([3, 3]);
+    [t, -t].forEach(function (v) {
+      g.beginPath(); g.moveTo(X(v), PAD.t); g.lineTo(X(v), H - PAD.b); g.stroke();
+      g.beginPath(); g.moveTo(PAD.l, Y(v)); g.lineTo(W - PAD.r, Y(v)); g.stroke();
+    });
+    g.setLineDash([]);
+  }
+
+  // points
+  var counts = { RT: 0, RB: 0, LT: 0, LB: 0 }, hits = [];
+  C.pts.forEach(function (p) {
+    var q = quadOf(p, t);
+    if (q) counts[q]++;
+    var on = C.hl[p.g];
+    if (on) hits.push(p);
+    if (C.quad !== 'all' && q !== C.quad && !on) {
+      g.fillStyle = 'rgba(154,156,163,.20)';
+    } else if (q === 'RB') g.fillStyle = 'rgba(181,54,43,.55)';
+    else if (q === 'RT') g.fillStyle = 'rgba(201,138,30,.5)';
+    else if (q === 'LB') g.fillStyle = 'rgba(47,125,82,.5)';
+    else if (q === 'LT') g.fillStyle = 'rgba(47,111,181,.5)';
+    else g.fillStyle = 'rgba(154,156,163,.30)';
+    g.beginPath(); g.arc(X(p.x), Y(p.y), 2.1, 0, 6.2832); g.fill();
+  });
+  hits.forEach(function (p) {
+    g.beginPath(); g.arc(X(p.x), Y(p.y), 4.4, 0, 6.2832);
+    g.fillStyle = '#111113'; g.fill();
+    g.strokeStyle = '#fff'; g.lineWidth = 1.4; g.stroke();
+  });
+
+  // axis labels + ticks
+  g.font = '11px Inter,system-ui,sans-serif';
+  g.fillStyle = '#9a9ca3'; g.textAlign = 'center';
+  [-0.4, -0.2, 0, 0.2, 0.4].forEach(function (v) {
+    g.fillText(v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(1), X(v), H - PAD.b + 16);
+  });
+  g.textAlign = 'right';
+  [-0.4, -0.2, 0.2, 0.4].forEach(function (v) {
+    g.fillText((v > 0 ? '+' : '−') + Math.abs(v).toFixed(1), PAD.l - 8, Y(v) + 4);
+  });
+  g.fillStyle = '#6a6d75';
+  g.font = '12px Inter,system-ui,sans-serif';
+  g.textAlign = 'center';
+  var vb = C.view === 'ko' ? '  → knockout raises' : '  → gene promotes';
+  g.fillText(C.X.meta.label + vb, (PAD.l + W - PAD.r) / 2, H - 14);
+  g.save();
+  g.translate(15, (PAD.t + H - PAD.b) / 2);
+  g.rotate(-Math.PI / 2);
+  g.fillText(C.Y.meta.label + vb, 0, 0);
+  g.restore();
+
+  overlay(hits, X, Y);
+  $('#cmpcount').textContent = C.pts.length.toLocaleString() + ' genes on both axes';
+  quadBar(counts);
+};
+
+function overlay(hits, X, Y) {
+  var ov = $('#cmpov');
+  ov.innerHTML = '';
+  ov.setAttribute('viewBox', '0 0 ' + geom.W + ' ' + geom.H);
+  hits.slice(0, 40).forEach(function (p) {
+    var t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', X(p.x) + 7); t.setAttribute('y', Y(p.y) - 6);
+    t.setAttribute('font-family', 'Inter,system-ui,sans-serif');
+    t.setAttribute('font-size', '11.5'); t.setAttribute('font-weight', '600');
+    t.setAttribute('fill', '#111113');
+    t.textContent = p.g;
+    ov.appendChild(t);
+  });
+}
+
+function QNAME(q) {
+  var up = C.view === 'ko' ? 'raises' : 'promotes', dn = C.view === 'ko' ? 'lowers' : 'restrains';
+  var sh = function (s) { return s.length > 20 ? s.slice(0, 18) + '…' : s; };
+  var x = sh(C.X.meta.label), y = sh(C.Y.meta.label);
+  return { RT: up + ' ' + x + ', ' + up + ' ' + y,
+           RB: up + ' ' + x + ', ' + dn + ' ' + y,
+           LT: dn + ' ' + x + ', ' + up + ' ' + y,
+           LB: dn + ' ' + x + ', ' + dn + ' ' + y }[q];
+}
+
+function quadBar(counts) {
+  var box = $('#cmpq');
+  box.innerHTML = '';
+  var tabs = h('div', 'qtabs', box);
+  var opts = [['all', 'All genes', C.pts.length]];
+  ['RB', 'RT', 'LB', 'LT'].forEach(function (q) { opts.push([q, QNAME(q), counts[q]]); });
+  opts.forEach(function (o) {
+    var b = h('button', C.quad === o[0] ? 'on' : '', tabs, o[1] + ' (' + o[2].toLocaleString() + ')');
+    b.type = 'button';
+    b.onclick = function () { C.quad = o[0]; window.__cmpPaint(); };
+  });
+  var dl = h('button', 'dl', tabs, 'Download CSV');
+  dl.type = 'button';
+  dl.onclick = csv;
+  table(box);
+}
+
+function rowsNow() {
+  var t = C.thr;
+  var r = C.pts.filter(function (p) {
+    if (!window.__passN(p)) return false;
+    return C.quad === 'all' ? true : quadOf(p, t) === C.quad;
+  });
+  r.sort(function (a, b) {
+    return (Math.abs(b.x) + Math.abs(b.y)) - (Math.abs(a.x) + Math.abs(a.y));
+  });
+  return r;
+}
+
+function table(box) {
+  var rows = rowsNow().slice(0, 60);
+  if (!rows.length) {
+    h('p', 'loading', box, 'Nothing passes these filters \u2014 try lowering the significance ' +
+      'requirement or the threshold. Axes built from one or two assays cannot reach a high ' +
+      'significance count.');
+    return;
+  }
+  var wrap = h('div', '', box);
+  wrap.style.overflowX = 'auto';
+  wrap.style.marginTop = '14px';
+  var tb = h('table', 'rows', wrap);
+  var tr = h('tr', '', h('thead', '', tb));
+  ['Gene', C.X.meta.label, C.Y.meta.label, 'Assays', 'Signif.'].forEach(function (c, i) {
+    var th = h('th', '', tr, c);
+    if (i) th.style.textAlign = 'right';
+  });
+  var body = h('tbody', '', tb);
+  rows.forEach(function (p) {
+    var r = h('tr', '', body);
+    var td = h('td', '', r);
+    var a = h('a', '', td, p.g);
+    a.href = '#' + p.g;
+    a.style.fontWeight = '600';
+    a.style.textDecoration = 'none';
+    a.onclick = function (e) { e.preventDefault(); $('#q').value = p.g; window.showGene(p.g); };
+    [[p.x, 'x'], [p.y, 'y']].forEach(function (v) {
+      var c = h('td', 'num', r, (v[0] > 0 ? '+' : '−') + Math.abs(v[0]).toFixed(3));
+      c.style.color = v[0] > 0 ? 'var(--up)' : 'var(--dn)';
+    });
+    h('td', 'num', r, p.nx + ' / ' + p.ny);
+    var sc = h('td', 'num', r, p.sx + ' / ' + p.sy);
+    if (p.sx + p.sy === 0) sc.style.color = 'var(--ink-4)';
+  });
+  if (rowsNow().length > 60)
+    h('p', 'tiny', box, 'Showing the 60 strongest of ' + rowsNow().length.toLocaleString() +
+      ' — download the CSV for the full list.');
+}
+
+function csv() {
+  var rows = rowsNow();
+  var out = ['gene,' + JSON.stringify(C.X.meta.label) + ',' + JSON.stringify(C.Y.meta.label) +
+             ',assays_x,assays_y,significant_x,significant_y'];
+  rows.forEach(function (p) {
+    out.push(p.g + ',' + p.x.toFixed(4) + ',' + p.y.toFixed(4) + ',' + p.nx + ',' + p.ny +
+             ',' + p.sx + ',' + p.sy);
+  });
+  var blob = new Blob([out.join('\n')], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tcell-corpus-compare.csv';
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+}
+})();
+
+/* ── compare: hover + click ─────────────────────────────────── */
+(function () {
+'use strict';
+var E = window.__E, $ = E.$, h = E.h, C = window.__C;
+var tip = null;
+function hide() { if (tip) { tip.remove(); tip = null; } }
+
+document.addEventListener('mousemove', function (ev) {
+  var cv = document.getElementById('cmpcv');
+  if (!cv || !C.pts.length) return;
+  var r = cv.getBoundingClientRect();
+  if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom) {
+    hide(); return;
+  }
+  var p = nearest(ev.clientX - r.left, ev.clientY - r.top, r.width, r.height);
+  if (!p) { hide(); return; }
+  if (!tip) tip = h('div', 'tipbox', document.body);
+  tip.innerHTML = '<b>' + p.g + '</b><br>' +
+    '<span class="s">' + C.X.meta.label + '</span> ' + fmt(p.x) + ' <span class="s">(' + p.nx + ' assays)</span><br>' +
+    '<span class="s">' + C.Y.meta.label + '</span> ' + fmt(p.y) + ' <span class="s">(' + p.ny + ' assays)</span>';
+  var x = ev.clientX + 14, y = ev.clientY + 14;
+  var b = tip.getBoundingClientRect();
+  if (x + b.width > innerWidth - 10) x = ev.clientX - b.width - 14;
+  if (y + b.height > innerHeight - 10) y = ev.clientY - b.height - 14;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}, { passive: true });
+
+function fmt(v) { return (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); }
+
+function nearest(px, py, w, hgt) {
+  var PADl = 66, PADr = 18, PADt = 18, PADb = 52, lim = 0.5;
+  var X = function (v) { return PADl + (v + lim) / (2 * lim) * (w - PADl - PADr); };
+  var Y = function (v) { return PADt + (lim - v) / (2 * lim) * (hgt - PADt - PADb); };
+  var best = null, bd = 100;
+  for (var i = 0; i < C.pts.length; i++) {
+    var p = C.pts[i];
+    var dx = X(p.x) - px, dy = Y(p.y) - py, d = dx * dx + dy * dy;
+    if (d < bd) { bd = d; best = p; }
+  }
+  return bd <= 64 ? best : null;
+}
+
+document.addEventListener('click', function (ev) {
+  var cv = document.getElementById('cmpcv');
+  if (!cv || ev.target !== cv || !C.pts.length) return;
+  var r = cv.getBoundingClientRect();
+  var p = nearest(ev.clientX - r.left, ev.clientY - r.top, r.width, r.height);
+  if (!p) return;
+  hide();
+  $('#q').value = p.g;
+  window.showGene(p.g);
+});
 })();

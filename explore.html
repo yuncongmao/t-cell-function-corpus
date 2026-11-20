@@ -143,6 +143,32 @@ dl.kv dd{color:var(--ink-2)}
 .tipbox{position:fixed;z-index:100;pointer-events:none;background:var(--ink);color:#fff;padding:9px 11px;border-radius:8px;font-size:12px;line-height:1.5;max-width:300px;box-shadow:0 8px 24px rgba(17,17,19,.25)}
 .tipbox b{font-weight:600}
 .tipbox .s{color:#d7d8db}
+
+/* compare */
+.cmp-top{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:6px}
+@media(max-width:760px){.cmp-top{grid-template-columns:1fr}}
+.axbox{border:1px solid var(--rule);border-radius:10px;padding:12px 14px;background:#fff}
+.axbox .hd{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);margin-bottom:7px}
+.axbox select{width:100%;font-size:13.5px;padding:7px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff}
+.axbox .sub{font-size:11.5px;color:var(--ink-4);margin-top:6px;min-height:16px}
+.cmp-bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:14px 0 16px}
+.cmp-bar label{font-size:11.5px;color:var(--ink-4);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.cmp-bar .fx-gb{flex:0 0 auto}
+.cmp-bar .fx-gb button{white-space:nowrap;padding:4px 10px;font-size:12px}
+.cmp-bar input[type=range]{width:110px}
+.cmp-bar input[type=search]{font-size:13px;padding:5px 9px;border:1px solid var(--rule);border-radius:7px;width:190px}
+.cmp-bar .val{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:30px}
+.cmp-bar .count{margin-left:auto;font-size:12.5px;color:var(--ink-4);font-variant-numeric:tabular-nums}
+.cmp-wrap{position:relative;width:100%}
+.cmp-wrap canvas{display:block;width:100%;border-radius:6px;cursor:crosshair}
+.cmp-wrap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.qtabs{display:flex;flex-wrap:wrap;gap:2px;margin:16px 0 0}
+.qtabs button{font-size:12.5px;padding:6px 12px;border:1px solid var(--rule);background:#fff;cursor:pointer;color:var(--ink-2);border-radius:7px}
+.qtabs button:hover{border-color:var(--ink-4)}
+.qtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.qtabs .dl{margin-left:auto}
+.cmp-note{font-size:12.5px;color:var(--ink-3);line-height:1.6;margin-top:12px}
+.cmp-note b{color:var(--ink)}
 footer.site-footer{border-top:1px solid var(--rule);padding:22px 24px 40px;font-size:12.5px;color:var(--ink-4);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 footer.site-footer a{color:var(--ink-3);text-decoration:none}
 footer.site-footer a:hover{color:var(--ink)}
@@ -188,10 +214,12 @@ footer.site-footer a:hover{color:var(--ink)}
   <div class="tabs">
     <button id="tab-gene" class="on">Gene</button>
     <button id="tab-assay">Assays</button>
+    <button id="tab-cmp">Compare</button>
   </div>
 
   <section class="panel" id="panel-gene"><div class="loading">Loading the gene index&hellip;</div></section>
   <section class="panel hide" id="panel-assay"><div class="loading">Loading assays&hellip;</div></section>
+  <section class="panel hide" id="panel-cmp"><div class="loading">Loading&hellip;</div></section>
 </div>
 
 <footer class="site-footer">
