@@ -1,4 +1,4 @@
-/*build*/window.__BUILD_EXPLORE = '1795202033';
+/*build*/window.__BUILD_EXPLORE = '1795202592';
 /* T Cell Function Corpus — gene / assay explorer */
 (function () {
 'use strict';
@@ -570,7 +570,7 @@ function drawer(a) {
 'use strict';
 var E = window.__E, S = E.S, $ = E.$, h = E.h;
 var C = { axes: null, cache: {}, X: null, Y: null, pts: [], quad: 'all',
-          thr: 0.15, hl: {}, dpr: 1, view: 'ko', minSig: 3 };
+          thr: 0.15, hl: {}, dpr: 1, view: 'ko', minSig: 2 };
 var DEF_X = 'c-proliferation--crisprn', DEF_Y = 'r-t-cell-persistence--crisprn';
 
 window.renderCompare = function () {

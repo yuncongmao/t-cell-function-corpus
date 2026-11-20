@@ -41,3 +41,18 @@ Figures are exported from the manuscript at 1600 px wide. To update one, drop a 
 python3 -m http.server 8000
 # open http://localhost:8000
 ```
+
+## Build ids (important)
+
+`index.html` and `explore.html` load their JS with a `?v=<build>` stamp, and each JS file
+records the same id. If a browser ever ends up with new HTML and stale JS, the page shows a
+"running an older cached copy" bar with a Reload button instead of failing silently.
+
+A pre-commit hook re-stamps the id whenever a JS file is part of the commit. Enable it once
+per clone:
+
+```bash
+git config core.hooksPath hooks
+```
+
+After that it is automatic. To stamp by hand, run `./bump.sh`.
