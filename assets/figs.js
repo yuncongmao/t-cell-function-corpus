@@ -1,4 +1,4 @@
-/*build*/window.__BUILD_FIGS = '1795202592';
+/*build*/window.__BUILD_FIGS = '1795203227';
 /* Native figures — benchmark explorer reads the paper's Source Data CSVs. */
 (function () {
 'use strict';

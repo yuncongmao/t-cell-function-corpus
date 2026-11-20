@@ -1,4 +1,4 @@
-/*build*/window.__BUILD_EXPLORE = '1795202592';
+/*build*/window.__BUILD_EXPLORE = '1795203227';
 /* T Cell Function Corpus — gene / assay explorer */
 (function () {
 'use strict';
@@ -688,6 +688,12 @@ function load(ax, id, quiet) {
     var sub = $('#sub' + ax);
     sub.textContent = a.modeLabel + ' · ' + a.assays + ' assay' +
       (a.assays === 1 ? '' : 's') + ' · ' + a.genes.toLocaleString() + ' genes measured';
+    if (a.warn) {
+      var cw = document.createElement('span');
+      cw.textContent = '  · essential-gene controls run the wrong way here — check direction before relying on it';
+      cw.style.color = '#b5362b';
+      sub.appendChild(cw);
+    }
     if (!a.nsig) {
       var w = document.createElement('span');
       w.textContent = '  · no FDR reported — the significance filter cannot apply here';
