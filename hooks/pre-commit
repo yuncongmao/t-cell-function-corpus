@@ -1,0 +1,10 @@
+#!/bin/sh
+# Re-stamp the build id whenever JS is part of this commit, then stage the result.
+# Enable once with:  git config core.hooksPath hooks
+changed=$(git diff --cached --name-only --diff-filter=ACM | grep -c '^assets/.*\.js$')
+[ "$changed" -eq 0 ] && exit 0
+[ -x ./bump.sh ] || exit 0
+./bump.sh >/dev/null || { echo "pre-commit: bump.sh failed"; exit 1; }
+git add index.html explore.html assets/explore.js assets/figs.js 2>/dev/null
+echo "pre-commit: build id re-stamped"
+exit 0
