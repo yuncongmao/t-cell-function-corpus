@@ -504,6 +504,34 @@ details.fx-src img{width:100%;height:auto;display:block}
   });
 })();
 </script>
-<script src="assets/figs.js?v=7e88edc5" defer></script>
+<script src="assets/figs.js?v=1795202033" defer></script>
+
+<script>
+/* If the browser kept an old copy of the JS, say so instead of failing silently. */
+(function () {
+  var __EXPECTED_BUILD__ = '1795202033';
+  var KEY = '__BUILD_FIGS';
+  addEventListener('load', function () {
+    setTimeout(function () {
+      var got = window[KEY];
+      if (__EXPECTED_BUILD__ === '0' || got === __EXPECTED_BUILD__) return;
+      var b = document.createElement('div');
+      b.setAttribute('style', 'position:fixed;left:0;right:0;bottom:0;z-index:999;' +
+        'background:#111113;color:#fff;font:14px Inter,system-ui,sans-serif;' +
+        'padding:13px 18px;display:flex;gap:14px;align-items:center;justify-content:center');
+      b.innerHTML = '<span>This page was updated and your browser is running an older cached copy.</span>';
+      var a = document.createElement('button');
+      a.textContent = 'Reload';
+      a.setAttribute('style', 'background:#fff;color:#111113;border:0;border-radius:7px;' +
+        'padding:6px 14px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer');
+      a.onclick = function () {
+        location.replace(location.pathname + '?fresh=' + Date.now() + location.hash);
+      };
+      b.appendChild(a);
+      document.body.appendChild(b);
+    }, 400);
+  });
+})();
+</script>
 </body>
 </html>

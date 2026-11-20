@@ -1,3 +1,4 @@
+/*build*/window.__BUILD_EXPLORE = '1795202033';
 /* T Cell Function Corpus — gene / assay explorer */
 (function () {
 'use strict';
@@ -570,7 +571,7 @@ function drawer(a) {
 var E = window.__E, S = E.S, $ = E.$, h = E.h;
 var C = { axes: null, cache: {}, X: null, Y: null, pts: [], quad: 'all',
           thr: 0.15, hl: {}, dpr: 1, view: 'ko', minSig: 3 };
-var DEF_X = 'c-proliferation--crisprn', DEF_Y = 'r-t-cell-exhaustion--crisprn';
+var DEF_X = 'c-proliferation--crisprn', DEF_Y = 'r-t-cell-persistence--crisprn';
 
 window.renderCompare = function () {
   var p = $('#panel-cmp');
@@ -599,7 +600,8 @@ function axisOptions(sel, cur) {
       var o = document.createElement('option');
       o.value = a.id;
       o.textContent = a.label + '  · ' + a.modeLabel + '  · ' +
-        a.assays + ' assay' + (a.assays === 1 ? '' : 's') + ', ' + a.genes.toLocaleString() + ' genes';
+        a.assays + ' assay' + (a.assays === 1 ? '' : 's') + ', ' + a.genes.toLocaleString() + ' genes' +
+        (a.nsig ? '' : '  · no FDR');
       if (a.id === cur) o.selected = true;
       og.appendChild(o);
     });
@@ -683,8 +685,15 @@ function load(ax, id, quiet) {
   got.then(function (d) {
     C[ax] = { meta: a, data: d };
     C.quad = 'all';
-    $('#sub' + ax).textContent = a.modeLabel + ' · ' + a.assays + ' assay' +
+    var sub = $('#sub' + ax);
+    sub.textContent = a.modeLabel + ' · ' + a.assays + ' assay' +
       (a.assays === 1 ? '' : 's') + ' · ' + a.genes.toLocaleString() + ' genes measured';
+    if (!a.nsig) {
+      var w = document.createElement('span');
+      w.textContent = '  · no FDR reported — the significance filter cannot apply here';
+      w.style.color = '#b5362b';
+      sub.appendChild(w);
+    }
     join();
   }).catch(function () { $('#sub' + ax).textContent = 'could not load'; });
 }
